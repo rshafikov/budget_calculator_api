@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import RecordViewSet, CategoryViewSet
+from .views import CategoryViewSet, RecordViewSet
 
 router = routers.DefaultRouter()
 router.register('records', RecordViewSet, basename='records')
