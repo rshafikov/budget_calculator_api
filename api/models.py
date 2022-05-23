@@ -13,8 +13,16 @@ class Category(models.Model):
 
 class Record(models.Model):
     amount = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='records')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='records'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        blank=True
+    )
     created = models.DateTimeField("Дата публикации", auto_now_add=True)
     comment = models.CharField(max_length=200, blank=True)
 
