@@ -13,7 +13,7 @@ TOKEN = os.getenv('TOKEN')
 updater = Updater(token=TOKEN)
 
 
-CATEGORIES =(
+CATEGORIES = (
     '🧀 Products', '🌭 Food', '🚇 Transport', '🧋 Cofee',
     '🚕 Taxi/Share', '🏠 Home', '🎲 FUN', '🎁 Presents',
     '💵 Debts', '👔 Clothing', '🏥 Health', '👩‍🎓 Study',
@@ -32,13 +32,15 @@ TABLE_MAIN_MENU = [
     ['Cписок расходов за месяц'],
     ['Показать итоговую сводку'],
 ]
-buttons_categories = ReplyKeyboardMarkup(TABLE_OF_CATEGORIES, resize_keyboard=True)
+buttons_categories = ReplyKeyboardMarkup(
+    TABLE_OF_CATEGORIES, resize_keyboard=True)
 
 buttons_table = ReplyKeyboardMarkup(TABLE_MAIN_MENU, resize_keyboard=True)
 
 buttons_ok = ReplyKeyboardMarkup([['ДА ✅', 'НАЗАД 🔙']], resize_keyboard=True)
 
 user_dict = {}
+
 
 class User:
     urls = {
@@ -108,7 +110,6 @@ class User:
         )
         # print(self.request_records_list)
 
-
     def __str__(self):
         return f'{self.username} -- {self.last_category}: {self.last_summ}'
 
@@ -119,7 +120,7 @@ def get_or_create_user(chat_id, update):
         user.get_auth()
         user_dict.update({user.id: user})
         return user
-    
+
     return user_dict.get(chat_id)
 
 
@@ -146,7 +147,8 @@ def start_message(update, context):
         chat_id=user.id,
         text=(
             'Привет, {}. Я буду следить за вашим семейным бюджетом. '
-            'Указывай категорию расхода, вводи сумму, смотри итог.'.format(user.first_name)
+            'Указывай категорию расхода, вводи сумму, смотри итог.'
+            .format(user.first_name)
         ),
         reply_markup=buttons_table
     )
@@ -176,7 +178,9 @@ def handle_message(update, context):
                 f'Категория: {record.get("category")}\n'
                 f'Сумма: {record.get("amount")} руб.\n' for record in data
             ]
-        )))
+                )
+            )
+        )
     elif user.last_message == 'Показать итоговую сводку':
         user.get_total()
         data = user.request_total.json()
@@ -192,18 +196,18 @@ def handle_message(update, context):
             ),
             reply_markup=buttons_table
         )
-    
+
     elif user.last_message in CATEGORIES[:15]:
         user.last_category = user.last_message
         context.bot.send_message(
                 chat_id=chat_id,
-                text=f'Укажите сумму:'
+                text='Укажите сумму:'
             )
 
     elif user.last_message == '⚙️ МЕНЮ':
         context.bot.send_message(
             chat_id=chat_id,
-            text=f'Выберете действие',
+            text='Выберете действие',
             reply_markup=buttons_table
         )
 
@@ -223,10 +227,10 @@ def handle_message(update, context):
             )
         else:
             context.bot.send_message(
-            chat_id=chat_id,
-            text='Укажите категорию расхода, пожалуйста',
-            reply_markup=buttons_categories
-            )        
+                chat_id=chat_id,
+                text='Укажите категорию расхода, пожалуйста',
+                reply_markup=buttons_categories
+            )
 
     elif user.last_message == 'ДА ✅':
         if user.last_summ and user.last_category:
@@ -245,18 +249,19 @@ def handle_message(update, context):
         else:
             context.bot.send_message(
                 chat_id=chat_id,
-                text=f'Укажите сумму:'
+                text='Укажите сумму:'
             )
 
     else:
         context.bot.send_message(
             chat_id=chat_id,
-            text=f'Я вас не понимаю, выберете категорию расхода',
+            text='Я вас не понимаю, выберете категорию расхода',
             reply_markup=buttons_categories
         )
+
 
 updater.dispatcher.add_handler(CommandHandler('start', start_message))
 updater.dispatcher.add_handler(MessageHandler(Filters.text, handle_message))
 
 updater.start_polling()
-updater.idle() 
+updater.idle()
