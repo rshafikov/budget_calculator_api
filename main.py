@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 
 import requests as r
 from dotenv import load_dotenv
@@ -9,6 +10,15 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 load_dotenv()
 
 TOKEN = os.getenv('TOKEN')
+
+URL = os.getenv('URL')
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='bot.log',
+    filemode='a',
+    level=logging.INFO
+)
 
 updater = Updater(token=TOKEN)
 
@@ -44,14 +54,13 @@ user_dict = {}
 
 class User:
     urls = {
-        'auth': 'http://127.0.0.1:8000/auth/users/',
-        'token': 'http://127.0.0.1:8000/auth/jwt/create/',
-        'records': 'http://127.0.0.1:8000/records/',
-        'total': 'http://127.0.0.1:8000/records/total-spend/',
+        'auth': f'http://{URL}/auth/users/',
+        'token': f'http://{URL}/auth/jwt/create/',
+        'records': f'http://{URL}/records/',
+        'total': f'http://{URL}/records/total-spend/',
     }
 
     def __init__(self, update):
-        """Надо сделать метакласс"""
         self.headers = {'Content-Type': 'application/json'}
         self.id = update.effective_chat.id
         self.first_name = update.message.chat.first_name
@@ -72,13 +81,11 @@ class User:
             headers=self.headers,
             data=data
         )
-        # print(self.request_auth.text)
         self.request_token = r.post(
             url=self.urls['token'],
             headers=self.headers,
             data=data
         )
-        # print(self.request_token.text)
         self.token = 'Bearer ' + self.request_token.json().get('access')
         self.headers.update({'Authorization': self.token})
 
@@ -94,21 +101,18 @@ class User:
                 headers=self.headers,
                 data=data
             )
-            # print(self.request_record.text)
 
     def get_total(self):
         self.request_total = r.get(
             url=self.urls['total'],
             headers=self.headers,
         )
-        # print(self.request_total)
 
     def get_records_list(self):
         self.request_records_list = r.get(
             url=self.urls['records'],
             headers=self.headers,
         )
-        # print(self.request_records_list)
 
     def __str__(self):
         return f'{self.username} -- {self.last_category}: {self.last_summ}'
@@ -158,7 +162,6 @@ def handle_message(update, context):
     chat_id = update.effective_chat.id
     user = get_or_create_user(chat_id, update)
     user.last_message = update.message.text
-    print(user.id)
     if user.last_message in ['Записать расход', 'НАЗАД 🔙']:
         user.last_category = None
         user.last_summ = None
@@ -167,6 +170,7 @@ def handle_message(update, context):
             text='Укажите категорию расхода, пожалуйста',
             reply_markup=buttons_categories
         )
+        logging.info(f'{user.id}: {user.first_name} - {user.last_message}')
 
     elif user.last_message == 'Cписок расходов за месяц':
         user.get_records_list()
@@ -177,25 +181,31 @@ def handle_message(update, context):
                 f'Дата: {return_correct_date(record.get("created"))}\n'
                 f'Категория: {record.get("category")}\n'
                 f'Сумма: {record.get("amount")} руб.\n' for record in data
-            ]
-                )
+                ])
             )
         )
+        logging.info(f'{user.id}: {user.first_name} - {user.last_message}')
+
     elif user.last_message == 'Показать итоговую сводку':
         user.get_total()
         data = user.request_total.json()
         summary_list = ''.join(make_table(data.get('summary')))
+        total_per_day = data.get('current_day')
+        if not total_per_day:
+            total_per_day = 0
         context.bot.send_message(
             chat_id=chat_id,
             text=(
                 f'За все время: {data.get("total")} руб.\n'
                 f'Ваши расходы за месяц: {data.get("current_month")} руб.\n'
-                'Категория   |   Тотал   '
-                '---------------------\n'
+                f'Ваши расходы за день: {total_per_day} руб.\n'
+                'Категория    |    Тотал    '
+                '--------------------------\n'
                 f'{summary_list}'
             ),
             reply_markup=buttons_table
         )
+        logging.info(f'{user.id}: {user.first_name} - {user.last_message}')
 
     elif user.last_message in CATEGORIES[:15]:
         user.last_category = user.last_message

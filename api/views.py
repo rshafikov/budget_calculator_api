@@ -10,6 +10,7 @@ from .models import Category
 from .serializers import CategorySerializer, RecordSerializer
 
 MONTH = datetime.now().month
+DAY = datetime.now().day
 
 
 class RecordViewSet(viewsets.ModelViewSet):
@@ -35,9 +36,13 @@ class RecordViewSet(viewsets.ModelViewSet):
             .values('category')
             .annotate(total=Sum('amount'))
         )
+        total_spend_per_day = (
+            user_records.filter(created__day=DAY).aggregate(Sum('amount'))
+        )
         return Response({
             'total': total_spend['amount__sum'],
             'current_month': total_spend_per_month['amount__sum'],
+            'current_day': total_spend_per_day['amount__sum'],
             'summary': total_spend_per_category}
         )
 
