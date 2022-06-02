@@ -175,31 +175,39 @@ def handle_message(update, context):
     elif user.last_message == 'Cписок расходов за месяц':
         user.get_records_list()
         data = user.request_records_list.json()
-        context.bot.send_message(
-            chat_id=chat_id,
-            text=('\n'.join([
-                f'Дата: {return_correct_date(record.get("created"))}\n'
-                f'Категория: {record.get("category")}\n'
-                f'Сумма: {record.get("amount")} руб.\n' for record in data
-                ])
+        if data:
+            context.bot.send_message(
+                chat_id=chat_id,
+                text=('\n'.join([
+                    f'Дата: {return_correct_date(record.get("created"))}\n'
+                    f'Категория: {record.get("category")}\n'
+                    f'Сумма: {record.get("amount")} руб.\n' for record in data
+                    ])
+                )
             )
-        )
-        logging.info(f'{user.id}: {user.first_name} - {user.last_message}')
+        else:
+            context.bot.send_message(
+                chat_id=chat_id,
+                text='В этом месяце еще не было расходов, записать расход?',
+                reply_markup=buttons_table
+                )
+            logging.info(f'{user.id}: {user.first_name} - {user.last_message}')
 
     elif user.last_message == 'Показать итоговую сводку':
         user.get_total()
         data = user.request_total.json()
         summary_list = ''.join(make_table(data.get('summary')))
-        total_per_day = data.get('current_day')
+        total_per_day = data.get("current_day")
         if not total_per_day:
             total_per_day = 0
         context.bot.send_message(
             chat_id=chat_id,
+
             text=(
                 f'За все время: {data.get("total")} руб.\n'
                 f'Ваши расходы за месяц: {data.get("current_month")} руб.\n'
                 f'Ваши расходы за день: {total_per_day} руб.\n'
-                'Категория    |    Тотал    '
+                'Категория    |    Тотал    \n'
                 '--------------------------\n'
                 f'{summary_list}'
             ),
