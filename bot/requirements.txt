@@ -8,11 +8,6 @@ coreapi==2.3.3
 coreschema==0.0.4
 cryptography==37.0.2
 defusedxml==0.7.1
-Django==2.2
-django-templated-mail==1.1.1
-djangorestframework==3.13.1
-djangorestframework-simplejwt==4.7.2
-djoser==2.1.0
 flake8==4.0.1
 idna==3.3
 isort==5.10.1

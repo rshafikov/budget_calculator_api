@@ -9,9 +9,6 @@ from rest_framework.response import Response
 from .models import Category
 from .serializers import CategorySerializer, RecordSerializer
 
-MONTH = datetime.now().month
-DAY = datetime.now().day
-
 
 class RecordViewSet(viewsets.ModelViewSet):
     serializer_class = RecordSerializer
@@ -21,14 +18,17 @@ class RecordViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        return self.request.user.records.filter(created__month=MONTH).all()
+        month = datetime.now().month
+        return self.request.user.records.filter(created__month=month).all()
 
     @action(detail=False, url_path='total-spend')
     def total(self, request):
+        month = datetime.now().month
+        day = datetime.now().day
         user_records = self.request.user.records.all()
         total_spend = user_records.aggregate(Sum('amount'))
         total_spend_per_month = (
-            user_records.filter(created__month=MONTH).aggregate(Sum('amount'))
+            user_records.filter(created__month=month).aggregate(Sum('amount'))
         )
         total_spend_per_category = (
             user_records
@@ -37,7 +37,7 @@ class RecordViewSet(viewsets.ModelViewSet):
             .annotate(total=Sum('amount'))
         )
         total_spend_per_day = (
-            user_records.filter(created__day=DAY).aggregate(Sum('amount'))
+            user_records.filter(created__day=day).aggregate(Sum('amount'))
         )
         return Response({
             'total': total_spend['amount__sum'],

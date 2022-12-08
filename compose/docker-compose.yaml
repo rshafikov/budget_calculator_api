@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - .env
+  api:
+    build:
+      context: ../.
+      dockerfile: Dockerfile
+    # command: /bin/sh -c 'python3 /app/manage.py migrate'
+    restart: always
+    depends_on:
+      - db
+    
+  bot:
+    build:
+      context: ../bot/.
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - api
