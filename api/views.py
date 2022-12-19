@@ -32,7 +32,6 @@ class RecordViewSet(viewsets.ModelViewSet):
         )
         total_spend_per_category = (
             user_records
-            .order_by('-total')
             .values('category')
             .annotate(total=Sum('amount'))
         )

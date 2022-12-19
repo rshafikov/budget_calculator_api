@@ -13,6 +13,8 @@ TOKEN = os.getenv('TOKEN')
 
 URL = os.getenv('URL')
 
+USER_CURRENCY = "€"
+
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     filename='bot.log',
@@ -137,7 +139,7 @@ def return_correct_date(string):
 
 def make_table(list):
     table = [(
-        '{0:<12} {1:>7} руб.\n'
+        '{0:<12} {1:>7} {USER_CURRENCY}\n'
         .format(CATEGORIES[record["category"] - 1], record["total"])
         ) for record in list
     ]
@@ -181,7 +183,7 @@ def handle_message(update, context):
                 text=('\n'.join([
                     f'Дата: {return_correct_date(record.get("created"))}\n'
                     f'Категория: {record.get("category")}\n'
-                    f'Сумма: {record.get("amount")} руб.\n' for record in data
+                    f'Сумма: {record.get("amount")} {"USER_CURRENCY"}\n' for record in data
                     ])
                 )
             )
@@ -204,9 +206,9 @@ def handle_message(update, context):
             chat_id=chat_id,
 
             text=(
-                f'За все время: {data.get("total")} руб.\n'
-                f'Ваши расходы за месяц: {data.get("current_month")} руб.\n'
-                f'Ваши расходы за день: {total_per_day} руб.\n'
+                f'За все время: {data.get("total")} {USER_CURRENCY}\n'
+                f'Ваши расходы за месяц: {data.get("current_month")} {USER_CURRENCY}\n'
+                f'Ваши расходы за день: {total_per_day} {USER_CURRENCY}\n'
                 'Категория    |    Тотал    \n'
                 '--------------------------\n'
                 f'{summary_list}'
@@ -222,7 +224,7 @@ def handle_message(update, context):
                 text='Укажите сумму:'
             )
 
-    elif user.last_message == '⚙️ МЕНЮ':
+    elif user.last_message == '⚙️Меню':
         context.bot.send_message(
             chat_id=chat_id,
             text='Выберете действие',
@@ -238,7 +240,7 @@ def handle_message(update, context):
                     f'Вы указали: \n'
                     '------------\n'
                     f'Категория: {user.last_category}\n'
-                    f'Cумма: {user.last_message} руб.\n\n'
+                    f'Cумма: {user.last_message} {USER_CURRENCY}\n\n'
                     'Если верно, нажмите "ДА ✅"'
                 ),
                 reply_markup=buttons_ok
@@ -258,7 +260,7 @@ def handle_message(update, context):
                 text=(
                     'Записаны данные: ✅\n'
                     f'Категория: {user.last_category}\n'
-                    f'Сумма: {user.last_summ} руб.\n\n'
+                    f'Сумма: {user.last_summ} {USER_CURRENCY}\n\n'
                     f'Ожидаю новую запись :)'),
                 reply_markup=buttons_table
             )
