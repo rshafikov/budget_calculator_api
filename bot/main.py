@@ -139,8 +139,11 @@ def return_correct_date(string):
 
 def make_table(list):
     table = [(
-        '{0:<12} {1:>7} {USER_CURRENCY}\n'
-        .format(CATEGORIES[record["category"] - 1], record["total"])
+        '{0:<12} {1:>7} {2}\n'
+        .format(
+            CATEGORIES[record["category"] - 1],
+            record["total"],
+            USER_CURRENCY)
         ) for record in list
     ]
     return table
@@ -183,7 +186,8 @@ def handle_message(update, context):
                 text=('\n'.join([
                     f'Дата: {return_correct_date(record.get("created"))}\n'
                     f'Категория: {record.get("category")}\n'
-                    f'Сумма: {record.get("amount")} {"USER_CURRENCY"}\n' for record in data
+                    f'Сумма: {record.get("amount")} '
+                    f'{USER_CURRENCY}\n' for record in data
                     ])
                 )
             )
@@ -207,7 +211,8 @@ def handle_message(update, context):
 
             text=(
                 f'За все время: {data.get("total")} {USER_CURRENCY}\n'
-                f'Ваши расходы за месяц: {data.get("current_month")} {USER_CURRENCY}\n'
+                f'Ваши расходы за месяц: '
+                f'{data.get("current_month")} {USER_CURRENCY}\n'
                 f'Ваши расходы за день: {total_per_day} {USER_CURRENCY}\n'
                 'Категория    |    Тотал    \n'
                 '--------------------------\n'
