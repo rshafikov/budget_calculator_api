@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
@@ -7,15 +7,18 @@ services:
       - /var/lib/postgresql/data/
     env_file:
       - .env
+
   api:
     build:
       context: ../.
       dockerfile: Dockerfile
-    # command: /bin/sh -c 'python3 /app/manage.py migrate'
+    image: budgetbot_api
     restart: always
     depends_on:
       - db
-    
+    command: >
+      sh -c "python3 /app/manage.py migrate && python3 /app/manage.py load_categories"
+
   bot:
     build:
       context: ../bot/.
