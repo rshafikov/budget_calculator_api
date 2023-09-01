@@ -7,7 +7,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Category
-from .serializers import CategorySerializer, RecordSerializer
+from .serializers import (CategorySerializer, RecordSerializer,
+                          UsersCategoriesSerializer)
+from .models import Users_categories
+
+
+# Вьюсет для пользовательских категроий
+class UsersCategoriesViewSet(viewsets.ModelViewSet):
+    queryset = Users_categories.objects.all()
+    serializer_class = UsersCategoriesSerializer
 
 
 class RecordViewSet(viewsets.ModelViewSet):

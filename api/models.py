@@ -11,6 +11,20 @@ class Category(models.Model):
         return self.title
 
 
+# Добавил модель пользовательских категорий
+class Users_categories(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='users_categories'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        blank=True
+    )
+
+
 class Record(models.Model):
     amount = models.IntegerField()
     user = models.ForeignKey(

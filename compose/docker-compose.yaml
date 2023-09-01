@@ -9,15 +9,15 @@ services:
       - .env
 
   api:
-    build:
-      context: ../.
-      dockerfile: Dockerfile
+    # build:
+    #   context: ../.
+    #   dockerfile: Dockerfile
     image: budgetbot_api
     restart: always
     depends_on:
       - db
     command: >
-      sh -c "python3 /app/manage.py migrate && python3 /app/manage.py load_categories"
+      sh -c "python3 /app/manage.py migrate && python3 /app/manage.py load_categories && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
 
   bot:
     build:

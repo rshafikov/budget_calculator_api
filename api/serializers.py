@@ -1,7 +1,14 @@
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
-from .models import Category, Record, User
+from .models import Category, Record, User, Users_categories
+
+
+# Сериалафзер для пользовательских категорий
+class UsersCategoriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Users_categories
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
