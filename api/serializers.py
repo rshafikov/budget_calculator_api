@@ -43,4 +43,4 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name', 'last_name', 'records', 'currency')
+        fields = ('username', 'email', 'first_name', 'last_name', 'records', 'currency', 'tg_id')

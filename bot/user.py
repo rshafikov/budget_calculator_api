@@ -17,7 +17,7 @@ class User:
         self.id = update.effective_chat.id
         self.first_name = update.message.chat.first_name
         self.last_name = update.message.chat.last_name
-        self.username = self.first_name + str(self.last_name)
+        self.username = f'{self.first_name}_{self.last_name}'
         self.last_message = update.message.text
         self.last_summ = None
         self.last_category = None
@@ -25,7 +25,8 @@ class User:
     def get_auth(self):
         data = {
             'username': self.username,
-            'password': str(self.id)+'ZSe!1'
+            'password': f'{self.id}ZSe!1',
+            'tg_id': f'{self.id}'
         }
         data = json.dumps(data)
         self.request_auth = r.post(

@@ -53,4 +53,4 @@ class Record(models.Model):
     comment = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
-        return f'<{self.category}: {self.amount} {self.user.currency}>'
+        return f'{self.category}: {self.amount} {self.user.currency}'

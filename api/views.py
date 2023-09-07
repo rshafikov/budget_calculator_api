@@ -6,8 +6,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Category
-from .serializers import CategorySerializer, RecordSerializer, AdminCategorySerializer
+from .models import Category, CustomUser
+from .serializers import (CategorySerializer, RecordSerializer,
+                          AdminCategorySerializer, CustomUserSerializer)
+from .permissions import IsAdminUser
 
 
 class RecordViewSet(viewsets.ModelViewSet):
@@ -48,22 +50,25 @@ class RecordViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    class CategoryViewSet(viewsets.ModelViewSet):
-        serializer_class = CategorySerializer
+    serializer_class = CategorySerializer
 
-        def get_serializer_class(self):
-            user = self.request.user
-            if user.is_admin:
-                return AdminCategorySerializer
-            return CategorySerializer
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_admin:
+            return AdminCategorySerializer
+        return CategorySerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-    serializer_class = CategorySerializer
 
     def get_queryset(self):
         user = self.request.user
         if user.is_admin:
             return Category.objects.all()
         return user.categories.all()
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAdminUser, ]
+    queryset = CustomUser.objects.all()
