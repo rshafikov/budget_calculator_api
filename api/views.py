@@ -7,18 +7,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Category
-from .serializers import (CategorySerializer, RecordSerializer,
-                          UsersCategoriesSerializer)
-from .models import Users_categories
-
-
-# Вьюсет для пользовательских категроий
-class UsersCategoriesViewSet(viewsets.ModelViewSet):
-    queryset = Users_categories.objects.all()
-    serializer_class = UsersCategoriesSerializer
+from .serializers import CategorySerializer, RecordSerializer, AdminCategorySerializer
 
 
 class RecordViewSet(viewsets.ModelViewSet):
+    """Вьюсет для записей расходов"""
     serializer_class = RecordSerializer
     permission_classes = (IsAuthenticated, )
 
@@ -55,5 +48,22 @@ class RecordViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    class CategoryViewSet(viewsets.ModelViewSet):
+        serializer_class = CategorySerializer
+
+        def get_serializer_class(self):
+            user = self.request.user
+            if user.is_admin:
+                return AdminCategorySerializer
+            return CategorySerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_admin:
+            return Category.objects.all()
+        return user.categories.all()

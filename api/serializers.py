@@ -1,17 +1,21 @@
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
-from .models import Category, Record, User, Users_categories
+from .models import Category, Record, CustomUser
 
 
-# Сериалафзер для пользовательских категорий
-class UsersCategoriesSerializer(serializers.ModelSerializer):
+class AdminCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Users_categories
+        model = Category
         fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = Category
@@ -21,7 +25,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class RecordSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='title'
+        slug_field='category_name'
     )
     user = serializers.SlugRelatedField(
         read_only=True,
@@ -38,5 +42,5 @@ class CustomUserSerializer(UserSerializer):
     records = serializers.StringRelatedField(many=True)
 
     class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'records')
+        model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name', 'records', 'currency')
