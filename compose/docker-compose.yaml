@@ -9,22 +9,29 @@ services:
       - .env
 
   api:
-    # build:
-    #   context: ../.
-    #   dockerfile: Dockerfile
-    image: budgetbot_api
+    build:
+      context: .
+      target: prod
+      dockerfile: Dockerfile
+    volumes:
+      - ../.:/app/
     restart: always
     ports:
       - "8000:8000"
     depends_on:
       - db
     command: >
-      sh -c "python3 /app/manage.py migrate && python3 /app/manage.py load_categories && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
+      sh -c "sleep 10 && python3 manage.py migrate && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
 
   bot:
     build:
-      context: ../bot/.
+      context: .
+      target: prod
       dockerfile: Dockerfile
+    volumes:
+      - ../.:/app/
     restart: always
+    command: >
+      sh -c "python3 bot/main.py"
     depends_on:
       - api

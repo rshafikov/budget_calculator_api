@@ -38,7 +38,7 @@ class Category(models.Model):
 
 
 class Record(models.Model):
-    amount = models.IntegerField()
+    amount = models.FloatField()
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

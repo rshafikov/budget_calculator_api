@@ -1,12 +1,13 @@
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from telegram import ReplyKeyboardMarkup
 from user_interface.user import User
-from user_interface.utility import make_table
+from user_interface.utility import is_float
 from variables import USER_CURRENCY
 from buttons import (
     TABLE_MAIN_MENU, CATEGORIES, TABLE_OF_CATEGORIES,
-    BUTTON_OK, BUTTON_TABLE, button_user_categories)
+    BUTTON_OK, BUTTON_TABLE, BUTTON_REPORTS, button_user_categories)
 from variables import logging
+import json
 
 
 class MyBot:
@@ -60,20 +61,6 @@ class MyBot:
         return user
 
     @staticmethod
-    def user_record_list(user: User, update, context):
-        data = user.request_get_records_list().json()
-        if data:
-            context.bot.send_message(
-                chat_id=user.id,
-                text=('\n'.join([
-                    # f'Дата: {self.return_correct_date(record.get("created"))}\n'
-                    f'Категория: {record.get("category")}\n'
-                    f'Сумма: {record.get("amount")} '
-                    f'{USER_CURRENCY}\n' for record in data
-                ]))
-            )
-
-    @staticmethod
     def user_choose_record(user, context):
         user.last_category = None
         user.last_summ = None
@@ -87,17 +74,18 @@ class MyBot:
         )
 
     @staticmethod
-    def user_month_records(user: User, context):
+    def user_record_list(user: User, context):
         data = user.request_get_records_list().json()
         if data:
             context.bot.send_message(
                 chat_id=user.id,
-                text=('\n'.join([
-                    # f'Дата: {self.return_correct_date(record.get("created"))}\n'
-                    f'Категория: {record.get("category")}\n'
-                    f'Сумма: {record.get("amount")} '
-                    f'{USER_CURRENCY}\n' for record in data
-                ]))
+                text=json.dumps(data, indent=2),
+                # text=('\n'.join([
+                #     # f'Дата: {self.return_correct_date(record.get("created"))}\n'
+                #     f'Категория: {record.get("category")}\n'
+                #     f'Сумма: {record.get("amount")} '
+                #     f'{USER_CURRENCY}\n' for record in data
+                # ]))
             )
         else:
             context.bot.send_message(
@@ -110,23 +98,16 @@ class MyBot:
             )
 
     @staticmethod
-    def user_total_records(user: User, context):
-        data = user.request_get_total().json()
-        summary_list = ''.join(make_table(data.get('summary')))
-        total_per_day = data.get('current_day')
-        total_per_week = data.get('current_week')
-        if not total_per_day:
-            total_per_day = 0
+    def user_total_records(user: User, context, period):
+        periods = {'месяц': 'month',
+                   'неделю': 'week',
+                   'день': 'day'}
+        period = periods[period]
+        data = user.request_get_total(
+            period=f'?period={period}').json()
         context.bot.send_message(
             chat_id=user.id,
-            text=(
-                f'За все время: {data.get("total")} {USER_CURRENCY}\n'
-                f'Ваши расходы за месяц: '
-                f'{data.get("current_month")} {USER_CURRENCY}\n'
-                f'Ваши расходы за день: {total_per_day} {USER_CURRENCY}\n'
-                'Категория    |    Тотал    \n'
-                '--------------------------\n'
-                f'{summary_list}'),
+            text=json.dumps(data, indent=4),
             reply_markup=BUTTON_TABLE
         )
 
@@ -153,6 +134,7 @@ class MyBot:
                 text='Укажите название категории'
             )
         elif user.last_category == 'NEW CATEGORY':
+            user.last_category = user.last_message
             context.bot.send_message(
                 chat_id=user.id,
                 text=(
@@ -162,11 +144,20 @@ class MyBot:
                 ),
                 reply_markup=BUTTON_OK
             )
-        elif user.last_message == 'Cписок расходов за месяц':
-            self.user_month_records(user, context)
+        elif user.last_message == 'Отчеты':
+            context.bot.send_message(
+                chat_id=user.id,
+                text='Выберете отчет',
+                reply_markup=BUTTON_REPORTS
+            )
+        elif any([
+                'за месяц' in user.last_message,
+                'за неделю' in user.last_message,
+                'за день' in user.last_message]):
+            self.user_total_records(user, context, user.last_message.split()[2])
 
-        elif user.last_message == 'Показать итоговую сводку':
-            self.user_total_records(user, context)
+        elif user.last_message == 'Показать список расходов':
+            self.user_record_list(user, context)
 
         elif user.last_message in ('⚙️Меню', 'НАЗАД 🔙'):
             context.bot.send_message(
@@ -182,7 +173,7 @@ class MyBot:
                 text='Укажите сумму:'
             )
 
-        elif user.last_message.isdigit():
+        elif user.last_message.isdigit() or is_float(user.last_message):
             user.last_summ = user.last_message
             if user.last_category:
                 context.bot.send_message(
@@ -203,23 +194,24 @@ class MyBot:
 
         elif user.last_message == 'ДА ✅':
             if user.last_summ and user.last_category:
-                user.request_make_record()
+                data = user.request_make_record().json()
                 context.bot.send_message(
                     chat_id=user.id,
-                    text=(
-                        'Записаны данные: ✅\n'
-                        f'Категория: {user.last_category}\n'
-                        f'Сумма: {user.last_summ} {USER_CURRENCY}\n\n'
-                        f'Ожидаю новую запись :)'),
+                    text=json.dumps(data, indent=4),
+                    # text=(
+                    #     'Записаны данные: ✅\n'
+                    #     f'Категория: {user.last_category}\n'
+                    #     f'Сумма: {user.last_summ} {USER_CURRENCY}\n\n'
+                    #     f'Ожидаю новую запись :)'),
                     reply_markup=BUTTON_TABLE
                 )
                 user.last_category = None
                 user.last_summ = None
             elif not user.last_summ and user.last_category:
-                user.last_category = None
                 if not user.last_message in user_categories:
                     self.user_create_category(
-                        user, user.last_message, 'POST', context)
+                        user, user.last_category, 'POST', context)
+                    user.last_category = None
                 else:
                     context.bot.send_message(
                         chat_id=user.id,

@@ -16,15 +16,18 @@ TABLE_OF_CATEGORIES = [
 
 TABLE_MAIN_MENU = [
     ['Записать расход'],
-    ['Cписок расходов за месяц'],
-    ['Cписок расходов за неделю'],
-    ['Cписок расходов за месяц'],
-    ['Показать итоговую сводку'],
+    ['Отчеты'],
+    ['Показать список расходов'],
 ]
-
+TABLE_REPORTS = [
+    ['Отчет за месяц'],
+    ['Отчет за неделю'],
+    ['Отчет за день'],
+]
 
 BUTTON_TABLE = ReplyKeyboardMarkup(TABLE_MAIN_MENU, resize_keyboard=True)
 BUTTON_OK = ReplyKeyboardMarkup([['ДА ✅', 'НАЗАД 🔙']], resize_keyboard=True)
+BUTTON_REPORTS = ReplyKeyboardMarkup(TABLE_REPORTS, resize_keyboard=True)
 
 
 def button_user_categories(buttons: list) -> ReplyKeyboardMarkup:

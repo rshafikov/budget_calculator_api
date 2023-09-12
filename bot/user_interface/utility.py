@@ -1,4 +1,5 @@
 from variables import USER_CURRENCY
+# from tabulate import tabulate
 
 
 def return_correct_date(date_string):
@@ -8,12 +9,25 @@ def return_correct_date(date_string):
     return f'🗓{date} 🕰{time}'
 
 
-def make_table(records_list):
-    table = [(
-        '{0:<12} {1:>7} {2}\n'
-        .format(
-            record['category__category_name'],
-            record['total'],
-            USER_CURRENCY)
-    ) for record in records_list]
-    return table
+# def make_table(records_list):
+#     headers = ["Category", "Total", "Currency"]
+#
+#     records_list = [
+#         {"category__category_name": "Category1", "total": 100},
+#         {"category__category_name": "Category2", "total": 200},
+#         {"category__category_name": "Category3", "total": 300},
+#     ]
+#     formatted_rows = []
+#
+#     for record in records_list:
+#         formatted_row = f"{record['category__category_name']:<12} {record['total']:<7} {USER_CURRENCY}"
+#         formatted_rows.append(formatted_row)
+#     return "\n".join(formatted_rows)
+
+
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

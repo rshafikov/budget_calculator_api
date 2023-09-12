@@ -62,7 +62,6 @@ class User:
 
     @property
     def categories(self) -> list:
-        logger.info('hui')
         default_categories = ['NEW CATEGORY', '⚙️Меню']
         req = self.request_category()
         if hasattr(req, 'text'):
@@ -92,9 +91,9 @@ class User:
                 headers=self.headers,
             )
 
-    def request_get_total(self) -> Response:
+    def request_get_total(self, period) -> Response:
         return r.get(
-            url=self.urls['total'],
+            url=self.urls['total'] + period,
             headers=self.headers,
         )
 

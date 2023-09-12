@@ -21,7 +21,10 @@ class CategoryAdminSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'category_name')
 
 
-class RecordSerializer(serializers.ModelSerializer):
+class RecordAdminSerializer(serializers.ModelSerializer):
+    created = serializers.DateTimeField(
+        format="%H:%M %d-%m-%Y",
+        read_only=True)
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='category_name'
@@ -34,6 +37,20 @@ class RecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Record
         fields = '__all__'
+
+
+class RecordUserSerializer(serializers.ModelSerializer):
+    created = serializers.DateTimeField(
+        format="%H:%M %d-%m-%Y",
+        read_only=True)
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='category_name'
+    )
+
+    class Meta:
+        model = Record
+        fields = ('category', 'amount', 'created')
 
 
 class CustomUserSerializer(UserSerializer):
