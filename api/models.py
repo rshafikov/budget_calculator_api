@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class CustomUser(AbstractUser):
@@ -33,7 +34,7 @@ class Category(models.Model):
     )
 
     def __str__(self):
-        return f'<{self.category_name}>'
+        return f'{self.category_name}'
 
 
 class Record(models.Model):
@@ -49,7 +50,7 @@ class Record(models.Model):
         blank=False,
         related_name='records'
     )
-    created = models.DateTimeField("Дата публикации", auto_now_add=True)
+    created = models.DateTimeField("Дата публикации", default=timezone.now)
     comment = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
