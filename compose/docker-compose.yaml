@@ -1,21 +1,26 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
     image: postgres:13.0-alpine
-    volumes:
-      - /var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
     env_file:
       - .env
+
   api:
-    build:
-      context: ../.
-      dockerfile: Dockerfile
-    # command: /bin/sh -c 'python3 /app/manage.py migrate'
+    # build:
+    #   context: ../.
+    #   dockerfile: Dockerfile
+    image: budgetbot_api
     restart: always
+    ports:
+      - "8000:8000"
     depends_on:
       - db
-    
+    command: >
+      sh -c "python3 /app/manage.py migrate && python3 /app/manage.py load_categories && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
+
   bot:
     build:
       context: ../bot/.

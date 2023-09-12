@@ -1,25 +1,34 @@
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
-from .models import Category, Record, User
+from .models import Category, Record, CustomUser
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'category_name')
+
+
+class CategoryAdminSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('id', 'user', 'category_name')
 
 
 class RecordSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='title'
+        slug_field='category_name'
     )
     user = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
-        default=serializers.CurrentUserDefault()
     )
 
     class Meta:
@@ -31,5 +40,12 @@ class CustomUserSerializer(UserSerializer):
     records = serializers.StringRelatedField(many=True)
 
     class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'records')
+        model = CustomUser
+        fields = ('username', 'first_name', 'last_name', 'records', 'currency', 'tg_id')
+
+
+class CustomUserCreateSerializer(UserSerializer):
+    # TODO: Impossible to create a user with this serialzer
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'currency', 'tg_id')
