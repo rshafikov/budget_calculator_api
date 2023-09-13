@@ -3,9 +3,10 @@ version: '3.9'
 services:
   db:
     image: postgres:13.0-alpine
-#    ports:
-    # TODO: check if this secure
-#      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
     env_file:
       - .env
 
@@ -18,7 +19,6 @@ services:
       - ../.:/app/
     restart: always
     ports:
-    # TODO: check if this secure
       - "8000:8000"
     depends_on:
       - db
@@ -37,3 +37,6 @@ services:
       sh -c "python3 bot/main.py"
     depends_on:
       - api
+
+volumes:
+  postgres_data:
