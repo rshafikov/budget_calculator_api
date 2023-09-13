@@ -7,6 +7,8 @@ load_dotenv()
 
 TOKEN = os.getenv('TOKEN')
 
+PASSWORD = os.getenv('PASSWORD')
+
 URL = os.getenv('URL')
 
 USER_CURRENCY = "€"

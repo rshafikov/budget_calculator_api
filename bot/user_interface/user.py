@@ -1,7 +1,7 @@
 import json
 import requests as r
 from requests import Response
-from variables import URL, logging
+from variables import PASSWORD, URL, logging
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class User:
 
         data = json.dumps({
             'username': self.username,
-            'password': f'{self.id}ZSe!1',
+            'password': f'{self.id}{PASSWORD}',
         })
         req = r.post(
             url=self.urls['auth'],

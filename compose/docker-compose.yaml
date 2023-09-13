@@ -3,8 +3,9 @@ version: '3.9'
 services:
   db:
     image: postgres:13.0-alpine
-    ports:
-      - "5432:5432"
+#    ports:
+    # TODO: check if this secure
+#      - "5432:5432"
     env_file:
       - .env
 
@@ -17,11 +18,12 @@ services:
       - ../.:/app/
     restart: always
     ports:
+    # TODO: check if this secure
       - "8000:8000"
     depends_on:
       - db
     command: >
-      sh -c "sleep 10 && python3 manage.py migrate && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
+      sh -c "sleep 10 && python3 manage.py makemigrations && python3 manage.py migrate && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
 
   bot:
     build:

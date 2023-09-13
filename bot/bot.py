@@ -67,10 +67,7 @@ class MyBot:
         context.bot.send_message(
             chat_id=user.id,
             text='Укажите категорию расхода, пожалуйста',
-            reply_markup=ReplyKeyboardMarkup(
-                [user.categories],
-                resize_keyboard=True
-            )
+            reply_markup=button_user_categories(user.categories)
         )
 
     @staticmethod
@@ -91,10 +88,7 @@ class MyBot:
             context.bot.send_message(
                 chat_id=user.id,
                 text='В этом месяце еще не было расходов, записать расход?',
-                reply_markup=ReplyKeyboardMarkup(
-                    [user.categories],
-                    resize_keyboard=True
-                )
+                reply_markup=button_user_categories(user.categories)
             )
 
     @staticmethod
@@ -208,7 +202,7 @@ class MyBot:
                 user.last_category = None
                 user.last_summ = None
             elif not user.last_summ and user.last_category:
-                if not user.last_message in user_categories:
+                if user.last_message not in user_categories:
                     self.user_create_category(
                         user, user.last_category, 'POST', context)
                     user.last_category = None
