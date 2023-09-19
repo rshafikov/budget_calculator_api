@@ -24,6 +24,8 @@ services:
       - db
     command: >
       sh -c "sleep 10 && python3 manage.py makemigrations && python3 manage.py migrate && gunicorn plus_balance.wsgi:application --bind 0.0.0.0:8000"
+    env_file:
+      - .env
 
   bot:
     build:
