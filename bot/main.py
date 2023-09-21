@@ -1,5 +1,5 @@
 from bot import MyBot
-from test_bot import TestBot
+# from test_bot import TestBot
 from variables import TOKEN
 
 

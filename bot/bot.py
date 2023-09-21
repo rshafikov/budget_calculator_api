@@ -3,8 +3,8 @@ from user_interface.user import User
 from user_interface.utility import is_float, prettify
 from variables import USER_CURRENCY
 from buttons import (
-    TABLE_MAIN_MENU, CATEGORIES, TABLE_OF_CATEGORIES,
-    BUTTON_OK, BUTTON_TABLE, BUTTON_REPORTS, button_user_categories)
+    BUTTON_CURRENCY, BUTTON_OK, BUTTON_TABLE,
+    BUTTON_REPORTS, button_user_categories)
 from variables import logging
 import json
 
@@ -99,7 +99,7 @@ class MyBot:
         period = periods[period]
         data = user.request_get_total(
             period=f'?period={period}').json()
-        output = prettify(data)
+        output = prettify(data, user.currency)
         context.bot.send_message(
             chat_id=user.id,
             text=output,
@@ -140,6 +140,23 @@ class MyBot:
                 ),
                 reply_markup=BUTTON_OK
             )
+        elif user.last_message == 'Выбрать валюту':
+            context.bot.send_message(
+                chat_id=user.id,
+                text=(
+                    'Укажите используемую валюту:\n'
+                ),
+                reply_markup=BUTTON_CURRENCY
+            )
+        elif user.last_message in ('EUR', 'RUB', 'USD', 'USDT'):
+            user.currency = user.last_message
+            context.bot.send_message(
+                chat_id=user.id,
+                text=(
+                    f'Выбранная валюта: {user.currency}\n'
+                ),
+                reply_markup=BUTTON_TABLE
+            )
         elif user.last_message == 'Отчеты':
             context.bot.send_message(
                 chat_id=user.id,
@@ -176,7 +193,7 @@ class MyBot:
                     chat_id=user.id,
                     text=(
                         f'Категория: {user.last_category}\n'
-                        f'Cумма: {user.last_message} {USER_CURRENCY}\n\n'
+                        f'Cумма: {user.last_message} {user.currency}\n\n'
                         'Если верно, нажмите "ДА ✅"'
                     ),
                     reply_markup=BUTTON_OK

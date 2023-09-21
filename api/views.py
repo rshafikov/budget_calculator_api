@@ -81,16 +81,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAdminUser, ]
+    # permission_classes = [IsAdminUser, ]
     queryset = CustomUser.objects.all()
 
 # TODO: fix this problem with currency
-    # @action(methods=['POST', 'GET'], detail=True, permission_classes=[AllowAny, ])
-    # def my_currency(self, request):
-    #     currency = request.query_params.get('currency', 'rub')
-    #     try:
-    #         user = self.request.user
-    #     except Exception as err:
-    #         raise NotAuthenticated from err
-    #     user.currency = currency
-    #     user.save()
+    @action(methods=['POST', 'GET'], detail=False, permission_classes=[AllowAny, ])
+    def my_currency(self, request):
+        try:
+            user = self.request.user
+        except Exception as err:
+            raise NotAuthenticated from err
+
+        if request.method == 'POST':
+            currency = request.data.get('currency', 'RUB')
+            user.currency = currency
+            user.save()
+            return Response({'currency': f'{currency}'})
+
+        return Response({'currency': f'{user.currency}'})

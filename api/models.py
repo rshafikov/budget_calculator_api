@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
         default='user',
         max_length=9,
     )
-    currency = models.CharField(max_length=5, default='')
+    currency = models.CharField(max_length=5, default='RUB')
     tg_id = models.CharField(max_length=15, default='')
 
     @property

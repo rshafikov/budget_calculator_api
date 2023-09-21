@@ -20,24 +20,35 @@ def is_float(s):
         return False
 
 
-def prettify(data):
-    period = data["period"]
-    st_p = " " * (13 - len(period))
+def prettify(data, cur):
+    p = data["period"]
+    total_per_p = data["total_per_period"]
+    total_per_p = (f"{float(total_per_p):.0f}" if cur == 'RUB' else
+                   f"{float(total_per_p):.1f}")
+    st_p = " " * (13 - len(p))
     markdown_text = (
         '<pre>'
-        f'|        Period: {period}{st_p}|\n'
-        f'| --------------------------- |\n'
+        f'+--------------+--------------+\n'
+        f'|        Period: {p}{st_p}|\n'
+        f'+--------------+--------------+\n'
         f'|   Category   |   Expenses   |\n'
-        f'| ------------ | ------------ |\n'
+        f'+--------------+--------------+\n'
     )
     for item in data['summary']:
         category = item['category__category_name']
-        total = str(item['total'])
+        total = (
+            f"{float(item['total']):.0f}" if cur == 'RUB' else
+            f"{float(item['total']):.1f}")
         if len(category) > 14:
             category = category[:13]
         sp_cat = " " * (11 - len(category))
-        sp_tot = " " * (10 - len(total))
-        cur = "€"
+        sp_tot = " " * (8 - len(total))
+        sp_totp = " " * (10 - len(total_per_p))
         markdown_text += f'|   {category}{sp_cat}|   {total}{cur}{sp_tot}|\n'
-    markdown_text += '</pre>'
+    markdown_text += (
+        f'+--------------+--------------+\n'
+        f'|         Total: {total_per_p}{cur}{sp_totp}|\n'
+        f'+--------------+--------------+\n'
+        '</pre>'
+    )
     return markdown_text
