@@ -1,6 +1,6 @@
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from user_interface.user import User
-from user_interface.utility import is_float, prettify
+from user_interface.utility import is_float, prettify_total
 from variables import USER_CURRENCY
 from buttons import (
     BUTTON_CURRENCY, BUTTON_OK, BUTTON_TABLE,
@@ -99,7 +99,7 @@ class MyBot:
         period = periods[period]
         data = user.request_get_total(
             period=f'?period={period}').json()
-        output = prettify(data, user.currency)
+        output = prettify_total(data, user.currency)
         context.bot.send_message(
             chat_id=user.id,
             text=output,
@@ -189,13 +189,22 @@ class MyBot:
         elif user.last_message.isdigit() or is_float(user.last_message):
             user.last_summ = user.last_message
             if user.last_category:
+                spt = " " * (6 - len(user.last_message))
+                spc = " " * (11 - len(user.last_category))
                 context.bot.send_message(
                     chat_id=user.id,
                     text=(
-                        f'Категория: {user.last_category}\n'
-                        f'Cумма: {user.last_message} {user.currency}\n\n'
-                        'Если верно, нажмите "ДА ✅"'
+                        f'<pre>'
+                        f'+--------------+--------------+\n'
+                        f'|   Category   |    Amount    |\n'
+                        f'+--------------+--------------+\n'
+                        f'|   {user.last_category}{spc}|    {user.last_message} {user.currency}{spt}|\n'
+                        f'+--------------+--------------+\n'
+                        f'|   Press ДА ✅ to continue   |\n'
+                        f'+--------------+--------------+\n'
+                        f'</pre>'
                     ),
+                    parse_mode='HTML',
                     reply_markup=BUTTON_OK
                 )
             else:
@@ -207,15 +216,26 @@ class MyBot:
 
         elif user.last_message == 'ДА ✅':
             if user.last_summ and user.last_category:
-                data = user.request_make_record().json()
+                try:
+                    user.request_make_record().json()
+                except Exception as err:
+                    raise Exception from err
+                spt = " " * (6 - len(user.last_summ))
+                spc = " " * (11 - len(user.last_category))
                 context.bot.send_message(
                     chat_id=user.id,
-                    text=json.dumps(data, indent=4),
-                    # text=(
-                    #     'Записаны данные: ✅\n'
-                    #     f'Категория: {user.last_category}\n'
-                    #     f'Сумма: {user.last_summ} {USER_CURRENCY}\n\n'
-                    #     f'Ожидаю новую запись :)'),
+                    text=(
+                        f'<pre>'
+                        f'+--------------+--------------+\n'
+                        f'|   Data has been writen...   |\n'
+                        f'+--------------+--------------+\n'
+                        f'|   Category   |    Amount    |\n'
+                        f'+--------------+--------------+\n'
+                        f'|   {user.last_category}{spc}|    {user.last_summ} {user.currency}{spt}|\n'
+                        f'+--------------+--------------+\n'
+                        f'</pre>'
+                    ),
+                    parse_mode='HTML',
                     reply_markup=BUTTON_TABLE
                 )
                 user.last_category = None

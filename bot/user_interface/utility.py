@@ -20,7 +20,7 @@ def is_float(s):
         return False
 
 
-def prettify(data, cur):
+def prettify_total(data, cur):
     p = data["period"]
     total_per_p = data["total_per_period"]
     total_per_p = (f"{float(total_per_p):.0f}" if cur == 'RUB' else
@@ -42,13 +42,16 @@ def prettify(data, cur):
         if len(category) > 14:
             category = category[:13]
         sp_cat = " " * (11 - len(category))
-        sp_tot = " " * (8 - len(total))
-        sp_totp = " " * (10 - len(total_per_p))
-        markdown_text += f'|   {category}{sp_cat}|   {total}{cur}{sp_tot}|\n'
+        sp_tot = " " * (7 - len(total))
+        sp_totp = " " * (9 - len(total_per_p))
+        markdown_text += f'|   {category}{sp_cat}|   {total} {cur}{sp_tot}|\n'
     markdown_text += (
         f'+--------------+--------------+\n'
-        f'|         Total: {total_per_p}{cur}{sp_totp}|\n'
+        f'|         Total: {total_per_p} {cur}{sp_totp}|\n'
         f'+--------------+--------------+\n'
         '</pre>'
     )
     return markdown_text
+
+
+
