@@ -3,8 +3,15 @@
 Проверить его работу можно по адресу: 
 https://t.me/test_your_potential_bot
 
-# .env
-
+# Инструкция по развёртыванию бота
+1) Создние .env файлов
+- /bot
+'''shell
+TOKEN='<YOUR TELEGRAM TOKEN>'
+URL='api:8000'
+PASSWORD='api_default_password'
+'''
+- /compose
 ```shell
 DB_ENGINE=django.db.backends.postgresql # указываем, что работаем с postgresql
 DB_NAME=postgres # имя базы данных
@@ -13,6 +20,10 @@ POSTGRES_PASSWORD=postgres # пароль для подключения к БД 
 DB_HOST=db # название сервиса (контейнера)a
 DB_PORT=5432 # порт для подключения к БД
 ```
+
+# .env
+
+
 
 # Текущие исправления по функционалу:
 
