@@ -4,13 +4,13 @@
 https://t.me/test_your_potential_bot
 
 # Инструкция по развёртыванию бота
-1) Создние .env файлов
+#### 1) Создние .env файлов
 - /bot
-"""shell
-TOKEN='<YOUR TELEGRAM TOKEN>'
+```shell
+TOKEN="<YOUR TELEGRAM TOKEN>"
 URL='api:8000'
-PASSWORD='api_default_password'
-"""
+PASSWORD="api_default_password"
+```
 - /compose
 ```shell
 DB_ENGINE=django.db.backends.postgresql # указываем, что работаем с postgresql
