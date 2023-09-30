@@ -7,6 +7,7 @@ from buttons import (
     BUTTON_REPORTS, button_user_categories)
 from variables import logging
 import json
+from prettytable import PrettyTable, ALL
 
 
 class MyBot:
@@ -189,21 +190,20 @@ class MyBot:
         elif user.last_message.isdigit() or is_float(user.last_message):
             user.last_summ = user.last_message
             if user.last_category:
-                spt = " " * (6 - len(user.last_message))
-                spc = " " * (11 - len(user.last_category))
+                text = f'<pre>'
+                table = PrettyTable()
+                table.field_names = ["CATEGORY", user.currency]
+                table.add_row([user.last_category, user.last_message])
+                table._max_width = {"CATEGORY": 17, user.currency: 7}
+                table.hrules = ALL
+                table.align = "l"
+                text += table.get_string()
+                text += f'</pre>'
+                text += f'\nAre you shure about that?'
+
                 context.bot.send_message(
                     chat_id=user.id,
-                    text=(
-                        f'<pre>'
-                        f'+--------------+--------------+\n'
-                        f'|   Category   |    Amount    |\n'
-                        f'+--------------+--------------+\n'
-                        f'|   {user.last_category}{spc}|    {user.last_message} {user.currency}{spt}|\n'
-                        f'+--------------+--------------+\n'
-                        f'|   Press ДА ✅ to continue   |\n'
-                        f'+--------------+--------------+\n'
-                        f'</pre>'
-                    ),
+                    text=text,
                     parse_mode='HTML',
                     reply_markup=BUTTON_OK
                 )
@@ -220,21 +220,10 @@ class MyBot:
                     user.request_make_record().json()
                 except Exception as err:
                     raise Exception from err
-                spt = " " * (6 - len(user.last_summ))
-                spc = " " * (11 - len(user.last_category))
+
                 context.bot.send_message(
                     chat_id=user.id,
-                    text=(
-                        f'<pre>'
-                        f'+--------------+--------------+\n'
-                        f'|   Data has been writen...   |\n'
-                        f'+--------------+--------------+\n'
-                        f'|   Category   |    Amount    |\n'
-                        f'+--------------+--------------+\n'
-                        f'|   {user.last_category}{spc}|    {user.last_summ} {user.currency}{spt}|\n'
-                        f'+--------------+--------------+\n'
-                        f'</pre>'
-                    ),
+                    text=f'Done. Dont forget to economy your money :)',
                     parse_mode='HTML',
                     reply_markup=BUTTON_TABLE
                 )

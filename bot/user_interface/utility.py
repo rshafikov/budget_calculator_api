@@ -24,8 +24,9 @@ def is_float(s):
 def prettify_total(data, cur):
     period = data["period"]
 
-    markdown_text = f'<pre>'
-    markdown_text += f'Period: {period}\n'
+
+    markdown_text = f'Period: {period}\n'
+    markdown_text += f'<pre>'
 
     total_per_p = data["total_per_period"]
     table = PrettyTable()
