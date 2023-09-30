@@ -2,6 +2,7 @@ from variables import USER_CURRENCY, logging
 # from tabulate import tabulate
 import re
 import json
+from prettytable import PrettyTable, ALL
 
 LOG = logging.getLogger(__name__)
 
@@ -21,37 +22,29 @@ def is_float(s):
 
 
 def prettify_total(data, cur):
-    p = data["period"]
+    period = data["period"]
+
+    markdown_text = f'<pre>'
+    markdown_text += f'Period: {period}\n'
+
     total_per_p = data["total_per_period"]
-    total_per_p = (f"{float(total_per_p):.0f}" if cur == 'RUB' else
-                   f"{float(total_per_p):.1f}")
-    st_p = " " * (13 - len(p))
-    markdown_text = (
-        '<pre>'
-        f'+--------------+--------------+\n'
-        f'|        Period: {p}{st_p}|\n'
-        f'+--------------+--------------+\n'
-        f'|   Category   |   Expenses   |\n'
-        f'+--------------+--------------+\n'
-    )
+    table = PrettyTable()
+    table.field_names = ["CATEGORY", cur, "%"]
     for item in data['summary']:
         category = item['category__category_name']
-        total = (
-            f"{float(item['total']):.0f}" if cur == 'RUB' else
-            f"{float(item['total']):.1f}")
-        if len(category) > 14:
-            category = category[:13]
-        sp_cat = " " * (11 - len(category))
-        sp_tot = " " * (7 - len(total))
-        sp_totp = " " * (9 - len(total_per_p))
-        markdown_text += f'|   {category}{sp_cat}|   {total} {cur}{sp_tot}|\n'
-    markdown_text += (
-        f'+--------------+--------------+\n'
-        f'|         Total: {total_per_p} {cur}{sp_totp}|\n'
-        f'+--------------+--------------+\n'
-        '</pre>'
-    )
+        money = round(item['total'])
+        total_share = round(money / total_per_p * 100)
+        table.add_row([category, money, total_share])
+    table.add_row(["TOTAL", round(total_per_p), 100])
+
+    # Настройки отображения таблицы
+    # В строке telegram помещается 31 символ
+    table._max_width = {"CATEGORY": 11, cur: 7, "%": 3}
+    table.hrules = ALL
+    table.align = "l"
+    # table.reversesort = True
+
+    markdown_text += table.get_string(sortby=cur)
+    markdown_text += f'</pre>'
+
     return markdown_text
-
-
-
