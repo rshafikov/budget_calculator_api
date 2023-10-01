@@ -1,8 +1,8 @@
 from variables import USER_CURRENCY, logging
-# from tabulate import tabulate
-import re
-import json
 from prettytable import PrettyTable, ALL
+from functools import wraps
+from datetime import datetime
+import traceback
 
 LOG = logging.getLogger(__name__)
 
@@ -22,30 +22,39 @@ def is_float(s):
 
 
 def prettify_total(data, cur):
-    period = data["period"]
+    output = f'<b>Period: {data["period"]}</b>\n<pre>'
+    # В строке telegram помещается 31 символ, max_width == 31
+    table = PrettyTable(
+        hrules=ALL,
+        align='l',
+        field_names=["CATEGORY", cur, "%"],
+        # reversesort=True
+    )
+    table._max_width = {"CATEGORY": 11, cur: 7, "%": 3}
 
-
-    markdown_text = f'Period: {period}\n'
-    markdown_text += f'<pre>'
-
-    total_per_p = data["total_per_period"]
-    table = PrettyTable()
-    table.field_names = ["CATEGORY", cur, "%"]
     for item in data['summary']:
         category = item['category__category_name']
         money = round(item['total'])
-        total_share = round(money / total_per_p * 100)
+        total_share = round(money / data["total_per_period"] * 100)
         table.add_row([category, money, total_share])
-    table.add_row(["TOTAL", round(total_per_p), 100])
+    table.add_row(["TOTAL", round(data["total_per_period"]), 100])
+    output += table.get_string(sortby=cur) + '</pre>'
+    return output
 
-    # Настройки отображения таблицы
-    # В строке telegram помещается 31 символ
-    table._max_width = {"CATEGORY": 11, cur: 7, "%": 3}
-    table.hrules = ALL
-    table.align = "l"
-    # table.reversesort = True
 
-    markdown_text += table.get_string(sortby=cur)
-    markdown_text += f'</pre>'
+def execute_time_wrapper(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            start_time = datetime.utcnow()
+            func(*args, **kwargs)
+            delta = datetime.utcnow() - start_time
+            LOG.info(
+                'Func: {}. Execute time: {} '.format(func.__name__, delta))
+        except Exception as error:
+            LOG.error((
+                'There is an error with {}'.format(func.__name__),
+                'Error: {}'.format(error),
+                'Full error: {}'.format(traceback.format_exc())))
 
-    return markdown_text
+    return wrapper

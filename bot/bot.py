@@ -1,14 +1,18 @@
+import datetime
+
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from user_interface.user import User
-from user_interface.utility import is_float, prettify_total
-from variables import USER_CURRENCY
+from user_interface.utility import (
+    is_float, prettify_total, execute_time_wrapper)
 from buttons import (
     BUTTON_CURRENCY, BUTTON_OK, BUTTON_TABLE,
     BUTTON_REPORTS, button_user_categories)
 from variables import logging
 import json
 from prettytable import PrettyTable, ALL
+import random
 
+LOG = logging.getLogger(__name__)
 
 class MyBot:
     user_dict = {}
@@ -118,6 +122,7 @@ class MyBot:
             reply_markup=button_user_categories(user.categories)
         )
 
+    @execute_time_wrapper
     def handle_message(self, update, context):
         user = self.initiate_user(update, context)
         user_categories = user.categories
@@ -191,15 +196,14 @@ class MyBot:
             user.last_summ = user.last_message
             if user.last_category:
                 text = f'<pre>'
-                table = PrettyTable()
-                table.field_names = ["CATEGORY", user.currency]
-                table.add_row([user.last_category, user.last_message])
+                table = PrettyTable(
+                    field_names=('CATEGORY', user.currency),
+                    hrules=ALL,
+                    align='l',
+                )
                 table._max_width = {"CATEGORY": 17, user.currency: 7}
-                table.hrules = ALL
-                table.align = "l"
-                text += table.get_string()
-                text += f'</pre>'
-                text += f'\nAre you shure about that?'
+                table.add_row([user.last_category, user.last_message])
+                text += table.get_string() + '</pre>\nЕсли запись верна, нажмите "ДА ✅"'
 
                 context.bot.send_message(
                     chat_id=user.id,
@@ -223,7 +227,9 @@ class MyBot:
 
                 context.bot.send_message(
                     chat_id=user.id,
-                    text=f'Done. Dont forget to economy your money :)',
+                    text=(f'Расход записан. Поздравляю!\nВы на шаг ближе к '
+                          f"пирожку с {random.choice(('яйцом', 'капустой', 'мясом'))}"
+                    ),
                     parse_mode='HTML',
                     reply_markup=BUTTON_TABLE
                 )
@@ -252,4 +258,4 @@ class MyBot:
                 reply_markup=button_user_categories(user_categories)
             )
 
-        logging.info(f'{user.id}: {user.first_name} - {user.last_message}')
+        LOG.info(f'{user.id}: {user.first_name} - {user.last_message}')
