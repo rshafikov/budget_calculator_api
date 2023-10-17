@@ -42,13 +42,14 @@ class RecordViewSet(viewsets.ModelViewSet):
 
         if period == 'month':
             month = now.month
-            total_spend_per_period = user_records().filter(created__month=month)
+            total_spend_per_period = user_records().filter(created__month=month, created__year=now.year)
         elif period == 'week':
             start_week = now - timedelta(days=now.weekday())
             total_spend_per_period = user_records().filter(created__date__gte=start_week)
         elif period == 'day':
             day = now.day
-            total_spend_per_period = user_records().filter(created__day=day)
+            total_spend_per_period = user_records().filter(
+                created__day=day, created__month=now.month, created__year=now.year)
         else:
             total_spend_per_period = user_records()
 
