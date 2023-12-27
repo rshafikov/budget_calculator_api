@@ -1,5 +1,6 @@
-from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 import json
+
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 
 class TestBot:

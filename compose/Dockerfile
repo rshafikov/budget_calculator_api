@@ -1,4 +1,7 @@
 FROM python:3.9-slim as python-base
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 RUN mkdir /app
 COPY . /app
 WORKDIR /app

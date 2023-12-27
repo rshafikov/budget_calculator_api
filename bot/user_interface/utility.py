@@ -6,6 +6,7 @@ import traceback
 
 LOG = logging.getLogger(__name__)
 
+
 def return_correct_date(date_string):
     new_string = date_string.split('T')
     date = new_string[0]
@@ -34,10 +35,10 @@ def prettify_total(data, cur):
 
     for item in data['summary']:
         category = item['category__category_name']
-        money = round(item['total'])
+        money = round(item['total'], 2)
         total_share = round(money / data["total_per_period"] * 100)
         table.add_row([category, money, total_share])
-    table.add_row(["TOTAL", round(data["total_per_period"]), 100])
+    table.add_row(["TOTAL", round(data["total_per_period"], 1), 100])
     output += table.get_string(sortby=cur) + '</pre>'
     return output
 

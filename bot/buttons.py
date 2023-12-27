@@ -35,6 +35,7 @@ BUTTON_OK = ReplyKeyboardMarkup([['ДА ✅', 'НАЗАД 🔙']], resize_keyboa
 BUTTON_REPORTS = ReplyKeyboardMarkup(TABLE_REPORTS, resize_keyboard=True)
 BUTTON_CURRENCY = ReplyKeyboardMarkup(TABLE_CURRENCY, resize_keyboard=True)
 
+
 def button_user_categories(buttons: list) -> ReplyKeyboardMarkup:
     button_row = []
     button_matrix = []

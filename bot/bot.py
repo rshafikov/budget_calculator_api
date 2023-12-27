@@ -1,18 +1,17 @@
-import datetime
-
-from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
-from user_interface.user import User
-from user_interface.utility import (
-    is_float, prettify_total, execute_time_wrapper)
-from buttons import (
-    BUTTON_CURRENCY, BUTTON_OK, BUTTON_TABLE,
-    BUTTON_REPORTS, button_user_categories)
-from variables import logging
 import json
-from prettytable import PrettyTable, ALL
-import random
+
+from prettytable import ALL, PrettyTable
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+
+from buttons import (BUTTON_CURRENCY, BUTTON_OK, BUTTON_REPORTS, BUTTON_TABLE,
+                     button_user_categories)
+from user_interface.user import User
+from user_interface.utility import (execute_time_wrapper, is_float,
+                                    prettify_total)
+from variables import logging
 
 LOG = logging.getLogger(__name__)
+
 
 class MyBot:
     user_dict = {}
@@ -52,7 +51,8 @@ class MyBot:
                 'Меня не просили, но я посоветую:\n'
                 'Записывай расход сразу после покупки, '
                 'потом будет сложно вспомнить куда ушли все деньги. '
-                'Старайся придерживаться минимализма при создании своих категорий:\n'
+                'Старайся придерживаться минимализма '
+                'при создании своих категорий:\n'
                 'кофе <- хороший пример нейминга\n'
                 'Коффе☕️👍 <- нейминг не очень, не спрашивай почему'
             ),
@@ -82,12 +82,6 @@ class MyBot:
             context.bot.send_message(
                 chat_id=user.id,
                 text=json.dumps(data, indent=2),
-                # text=('\n'.join([
-                #     # f'Дата: {self.return_correct_date(record.get("created"))}\n'
-                #     f'Категория: {record.get("category")}\n'
-                #     f'Сумма: {record.get("amount")} '
-                #     f'{USER_CURRENCY}\n' for record in data
-                # ]))
             )
         else:
             context.bot.send_message(
@@ -97,7 +91,7 @@ class MyBot:
             )
 
     @staticmethod
-    def user_total_records(user: User, context, period):
+    def user_total_records(user: User, context, period='день'):
         periods = {'месяц': 'month',
                    'неделю': 'week',
                    'день': 'day'}
@@ -125,7 +119,7 @@ class MyBot:
     @execute_time_wrapper
     def handle_message(self, update, context):
         user = self.initiate_user(update, context)
-        user_categories = user.categories
+        user_categories = [c.lower() for c in user.categories]
         if user.last_message in ['Записать расход', 'НАЗАД 🔙']:
             self.user_choose_record(user, context)
 
@@ -173,7 +167,8 @@ class MyBot:
                 'за месяц' in user.last_message,
                 'за неделю' in user.last_message,
                 'за день' in user.last_message]):
-            self.user_total_records(user, context, user.last_message.split()[2])
+            self.user_total_records(
+                user, context, user.last_message.split()[2])
 
         elif user.last_message == 'Показать список расходов':
             self.user_record_list(user, context)
@@ -185,8 +180,8 @@ class MyBot:
                 reply_markup=BUTTON_TABLE
             )
 
-        elif user.last_message in user_categories:
-            user.last_category = user.last_message
+        elif user.last_message.lower() in user_categories:
+            user.last_category = user.last_message.lower()
             context.bot.send_message(
                 chat_id=user.id,
                 text='Укажите сумму:'
@@ -203,7 +198,9 @@ class MyBot:
                 )
                 table._max_width = {"CATEGORY": 17, user.currency: 7}
                 table.add_row([user.last_category, user.last_message])
-                text += table.get_string() + '</pre>\nЕсли запись верна, нажмите "ДА ✅"'
+                text += (
+                    table.get_string()
+                    + '</pre>\nЕсли запись верна, нажмите "ДА ✅"')
 
                 context.bot.send_message(
                     chat_id=user.id,
@@ -225,16 +222,10 @@ class MyBot:
                 except Exception as err:
                     raise Exception from err
 
-                context.bot.send_message(
-                    chat_id=user.id,
-                    text=(f'Расход записан. Поздравляю!\nВы на шаг ближе к '
-                          f"пирожку с {random.choice(('яйцом', 'капустой', 'мясом'))}"
-                    ),
-                    parse_mode='HTML',
-                    reply_markup=BUTTON_TABLE
-                )
+                self.user_total_records(user, context)
                 user.last_category = None
                 user.last_summ = None
+
             elif not user.last_summ and user.last_category:
                 if user.last_message not in user_categories:
                     self.user_create_category(

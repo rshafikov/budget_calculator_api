@@ -58,7 +58,9 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'first_name', 'last_name', 'records', 'currency', 'tg_id')
+        fields = (
+            'username', 'first_name', 'last_name',
+            'records', 'currency', 'tg_id')
 
 
 class CustomUserCreateSerializer(UserSerializer):

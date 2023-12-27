@@ -72,7 +72,8 @@ class User:
                 c['category_name'] for c in req.json())] + default_categories
         return default_categories
 
-    def request_my_currency(self, currency = None, method: str = 'GET') -> Response:
+    def request_my_currency(
+            self, currency=None, method: str = 'GET') -> Response:
         data = None
         if method == 'POST' and currency:
             data = json.dumps({

@@ -5,8 +5,6 @@ services:
     image: postgres:13.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - "5432:5432"
     env_file:
       - .env
 
@@ -39,6 +37,10 @@ services:
       sh -c "python3 bot/main.py"
     depends_on:
       - api
+    env_file:
+      - .env
+    environment:
+      - debug=INFO
 
 volumes:
   postgres_data:
