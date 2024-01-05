@@ -80,6 +80,7 @@ jobs:
           port: ${{ secrets.HOST_PORT }}
           script: |
             cd budget_calculator_api/
+            git pull
             docker compose -f compose/docker-compose.yaml down
             docker compose -f compose/docker-compose.yaml up -d
             docker ps -a | grep compose
