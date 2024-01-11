@@ -225,7 +225,7 @@ class MyBot:
                     reply_markup=button_user_categories(user_categories)
                 )
 
-        elif user.last_message == 'ДА ✅':
+        elif user.last_message in ('ДА ✅', 'Yes', 'yes', 'Да', 'да', '+'):
             if user.last_summ and user.last_category:
                 try:
                     user.request_make_record().json()
