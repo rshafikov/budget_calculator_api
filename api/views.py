@@ -36,7 +36,8 @@ class RecordViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='total-spend')
     def total(self, request):
         period = request.query_params.get('period', 'day')
-        date_from = request.query_params.get('from')  # 14-10-2023
+        date_from = request.query_params.get('from')  # Expected format: '14-10-2023'
+        date_to = request.query_params.get('to')  # Expected format: '14-10-2023'
 
         now = datetime.now()
         user_records = self.request.user.records.all
@@ -54,11 +55,19 @@ class RecordViewSet(viewsets.ModelViewSet):
                 created__month=now.month,
                 created__year=now.year)
         elif date_from:
-            date_to = request.query_params.get('to')
-            total_spend_per_period = user_records().filter(
-                created__day__gte=datetime.strptime(date_from, '%d-%m-%Y').day,
-                created__day__lte=datetime.strptime(date_to, '%d-%m-%Y').day
-            )
+            try:
+                date_from_parsed = datetime.strptime(date_from, '%d-%m-%Y')
+                if date_to:
+                    date_to_parsed = datetime.strptime(date_to, '%d-%m-%Y')
+                else:
+                    date_to_parsed = now
+
+                total_spend_per_period = user_records().filter(
+                    created__date__gte=date_from_parsed,
+                    created__date__lte=date_to_parsed
+                )
+            except ValueError:
+                return Response({'error': 'Invalid date format. Use DD-MM-YYYY.'}, status=400)
         else:
             total_spend_per_period = user_records()
 
@@ -67,8 +76,7 @@ class RecordViewSet(viewsets.ModelViewSet):
 
         return Response({
             'period': period,
-            'total_per_period': total_spend_per_period.aggregate(
-                Sum('amount'))['amount__sum'],
+            'total_per_period': total_spend_per_period.aggregate(Sum('amount'))['amount__sum'],
             'summary': total_spend_per_category
         })
 
