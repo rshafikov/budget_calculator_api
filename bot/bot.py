@@ -95,26 +95,31 @@ class MyBot:
             )
 
     @staticmethod
-    def user_total_records(user: User, context, period='день'):
-        periods = {'месяц': 'month',
-                   'неделю': 'week',
-                   'день': 'day'}
+    def user_total_records(user: User, context, period='день', custom=None):
+        period = {
+            'месяц': 'month',
+            'неделю': 'week',
+            'день': 'day'
+        }[period] if not custom else custom
         output = textwrap.dedent(
             """
             <pre>Нет записей за {period}</pre>
             """
         ).format(period=period)
-        period = periods[period]
-        data = user.request_get_total(
-            period=f'?period={period}').json()
-        if data['summary']:
-            output = prettify_total(data, user.currency)
+        try:
+            data = user.request_get_total(
+                period=f'?period={period}').json()
+            if data['summary']:
+                output = prettify_total(data, user.currency)
+        except Exception as err:
+            output = f'period: {period!r}\n**error**:\n {err}'
         context.bot.send_message(
             chat_id=user.id,
             text=output,
             parse_mode='HTML',
             reply_markup=BUTTON_TABLE
         )
+
 
     @staticmethod
     def user_create_category(
@@ -251,6 +256,11 @@ class MyBot:
                     chat_id=user.id,
                     text='Укажите сумму:'
                 )
+        elif user.last_message.lower().startswith('from:'):
+            custom_period = user.last_message.lower().split(':')[1]
+            self.user_total_records(
+                user, context, period=custom_period, custom=custom_period
+            )
 
         else:
             context.bot.send_message(

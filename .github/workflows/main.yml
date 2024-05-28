@@ -32,6 +32,7 @@ jobs:
           to: ${{ secrets.MY_TG_ID }}
           token: ${{ secrets.BOT_TOKEN }}
           message: |
+            ```commit
             ${{ github.workflow }} created by ${{ github.actor }}.
             **Commit message:**
             ${{ github.event.head_commit.message }}
