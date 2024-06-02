@@ -1,58 +1,84 @@
-from typing import Optional, List
+from datetime import datetime
+from typing import List
 
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from api.core.db.models import BaseModel, TimeStampMixin
+from sqlalchemy import ForeignKey, UniqueConstraint, func, Enum
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from api.schemas.user_schemas import Role
 
 
-class UserModel(BaseModel, TimeStampMixin):
-    __tablename__ = 'users'
+class BaseModel(AsyncAttrs, DeclarativeBase):
+    __abstract__ = True
 
-    name: Mapped[Optional[str]]
-    lastname: Mapped[Optional[str]]
-    telegram_id: Mapped[int] = mapped_column(unique=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
+
+    def __repr__(self):
+        return f"{self.__tablename__}:(id={self.id})"
+
+
+class UserModel(BaseModel):
+    __tablename__ = "users"
+
+    name: Mapped[str | None]
+    lastname: Mapped[str | None]
+    telegram_id: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
+    role: Mapped[str] = mapped_column(Enum(Role), default=Role.USER)
 
-    records: Mapped[List['RecordModel']] = relationship(
-        back_populates='user', cascade='all, delete-orphan'
+    records: Mapped[List["RecordModel"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+    )
+    categories: Mapped[List["CategoryModel"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
 
 
-class RecordModel(BaseModel, TimeStampMixin):
-    __tablename__ = 'records'
+class RecordModel(BaseModel):
+    __tablename__ = "records"
 
-    # id: Mapped[int] = mapped_column(primary_key=True)
     amount: Mapped[int]
 
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped['UserModel'] = relationship(back_populates='records')
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["UserModel"] = relationship(
+        back_populates="records", lazy="selectin")
 
-    category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'))
-    category: Mapped['CategoryModel'] = relationship(back_populates='records')
-
-    currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'))
-
-
-class CategoryModel(BaseModel, TimeStampMixin):
-    __tablename__ = 'categories'
-
-    # id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
-    symbol: Mapped[Optional[str]]
-
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped['UserModel'] = relationship(back_populates='categories')
-
-    records: Mapped[List['RecordModel']] = relationship(
-        back_populates='category', cascade='all, delete-orphan'
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+    category: Mapped["CategoryModel"] = relationship(
+        back_populates="records", lazy="selectin"
     )
 
-    __table_args__ = (UniqueConstraint('name', 'user_id', name='_name_user_uc'),)
+    currency_id: Mapped[int] = mapped_column(ForeignKey("currencies.id"))
+
+
+class CategoryModel(BaseModel):
+    __tablename__ = "categories"
+
+    name: Mapped[str]
+    symbol: Mapped[str | None]
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["UserModel"] = relationship(
+        back_populates="categories", lazy="selectin"
+    )
+
+    records: Mapped[List["RecordModel"]] = relationship(
+        back_populates="category",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("name", "user_id", name="_name_user_uc"),
+    )
 
 
 class CurrencyModel(BaseModel):
-    __tablename__ = 'currencies'
+    __tablename__ = "currencies"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    symbol: Mapped[Optional[str]]
+    symbol: Mapped[str | None]

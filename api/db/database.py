@@ -1,17 +1,7 @@
-from sqlalchemy.ext.asyncio import (
-    create_async_engine, AsyncSession, async_sessionmaker
-)
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-DATABASE_URL = 'postgresql://user:password@localhost/budget_bot'
-
-engine = create_async_engine(DATABASE_URL, echo=True)
-
-async_session = async_sessionmaker(engine, expire_on_commit=False)
+from api.core import settings
 
 
-async def get_session() -> AsyncSession:
-    try:
-        async with async_session() as session:
-            yield session
-    finally:
-        await session.close()
+engine = create_async_engine(settings.db_url, echo=True)
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
