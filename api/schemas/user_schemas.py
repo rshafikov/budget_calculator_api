@@ -1,10 +1,10 @@
 import enum
-
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
-from api.schemas.record_schemas import Record
+from pydantic import BaseModel, ConfigDict
+
 from api.schemas.category_schemas import Category
+from api.schemas.record_schemas import Record
 
 
 class Role(enum.Enum):

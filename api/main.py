@@ -2,10 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 
 from api.routers.auth import auth_router
-
 # from api.routers.records import record_router
 from api.routers.users import users_router
-
 
 app = FastAPI()
 

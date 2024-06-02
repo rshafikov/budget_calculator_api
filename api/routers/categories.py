@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-from api.schemas.category_schemas import CategoryCreate
-
 
 record_router = APIRouter(prefix="/categories", tags=["categories"])
 

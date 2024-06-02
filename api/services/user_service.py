@@ -1,7 +1,8 @@
+from fastapi import Depends
+
 from api.core.security import get_password_hash
 from api.schemas.user_schemas import User, UserCreate
 from api.utils.uow import IUnitOfWork, UnitOfWork
-from fastapi import Depends
 
 
 class UserService:

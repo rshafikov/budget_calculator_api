@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 import jwt
@@ -5,17 +6,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from api.core import settings
+from api.core.security import create_token, verify_password
 from api.schemas.auth import Token
 from api.schemas.user_schemas import Role, User
-from api.core.security import create_token, verify_password
 from api.services.user_service import UserService, get_user_service
-
-token_security = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
+token_security = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-async def check_token(
+logger = logging.getLogger(__name__)
+
+
+def check_token(
         encoded_token: Annotated[str, Depends(token_security)]
 ) -> dict:
     try:
@@ -23,13 +26,15 @@ async def check_token(
             encoded_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as err:
+        logger.error('Expired token %r: %s', encoded_token, err)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.InvalidTokenError:
+        ) from err
+    except jwt.InvalidTokenError as err:
+        logger.error('Invalid token %r: %s', encoded_token, err)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token can't be decoded",

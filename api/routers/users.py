@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.routers.auth import rbac
 from api.schemas.user_schemas import Role, UserBase, UserCreate, UserSecure
 from api.services.user_service import UserService, get_user_service
-
 
 users_router = APIRouter(
     prefix="/users",
@@ -11,7 +10,11 @@ users_router = APIRouter(
 )
 
 
-@users_router.post("/", response_model=UserBase)
+@users_router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UserBase
+)
 async def create_user(
     new_user: UserCreate, user_service: UserService = Depends(get_user_service)
 ):
