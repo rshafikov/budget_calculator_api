@@ -1,3 +1,4 @@
 pytest
 httpx
 pylint
+pip install aiosqlite

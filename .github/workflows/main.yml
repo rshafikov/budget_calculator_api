@@ -33,15 +33,19 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           message: |
             ${{ github.workflow }} created by ${{ github.actor }}.
-            **Commit message:**
+            
+            Commit message:
             ${{ github.event.head_commit.message }}
-            **Added files:**
+            
+            Added files:
             ${{ steps.changed-files.outputs.added_files }}
-            **Modified files:**
+            
+            Modified files:
             ${{ steps.changed-files.outputs.modified_files }}
-            **Deleted files:**
+            
+            Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
-            ```
+            
 
 #  build_and_push_to_docker_hub:
 #    name: Push Docker image to Docker Hub

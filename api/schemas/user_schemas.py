@@ -14,8 +14,8 @@ class Role(enum.Enum):
 
 class UserBase(BaseModel):
     telegram_id: str
-    name: str | None
-    lastname: str | None
+    name: str | None = None
+    lastname: str | None = None
 
 
 class UserCreate(UserBase):

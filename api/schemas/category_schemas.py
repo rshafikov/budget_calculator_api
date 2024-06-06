@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CategoryBase(BaseModel):
@@ -13,10 +13,9 @@ class CategoryCreate(CategoryBase):
 
 
 class Category(CategoryBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
     updated_at: datetime
     user_id: int
-
-    class Config:
-        from_attributes = True

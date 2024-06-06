@@ -1,3 +1,5 @@
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +13,9 @@ class Settings(BaseSettings, env_ignore_empty=True):
     DB_PASS: str = "password"
     DB_NAME: str = "budget_bot"
 
+    DB_ECHO: bool = False
+    DB_TEST: bool = False
+
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     SECRET_KEY: str = (
@@ -19,6 +24,9 @@ class Settings(BaseSettings, env_ignore_empty=True):
 
     @property
     def db_url(self) -> str:
+        if self.DB_TEST:
+            return 'sqlite+aiosqlite:///testdb.db'
+
         return (
             f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
