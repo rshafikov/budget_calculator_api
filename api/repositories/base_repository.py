@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import func
 
 
 class AbstractRepository(ABC):
@@ -15,6 +16,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def get_all(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def count(self):
         raise NotImplementedError
 
 
@@ -39,3 +44,8 @@ class Repository(AbstractRepository):
             select(self.model).offset(offset).limit(limit)
         )
         return r.scalars().all()
+
+    async def count(self):
+        query = select(func.count()).select_from(self.model)
+        r = await self.session.execute(query)
+        return r.scalar_one()

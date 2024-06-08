@@ -68,7 +68,7 @@ def rbac(roles: set[Role]):
     return validate_role
 
 
-@auth_router.post("/token")
+@auth_router.post("/token", status_code=status.HTTP_201_CREATED)
 async def token(
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
     user_service: UserService = Depends(get_user_service),

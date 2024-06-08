@@ -1,11 +1,16 @@
 import os
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PWD = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings, env_ignore_empty=True):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8")
+        env_file=PWD / '.env',
+        env_file_encoding="utf-8"
+    )
 
     DB_HOST: str = "localhost"
     DB_PORT: str = "5432"
@@ -14,7 +19,7 @@ class Settings(BaseSettings, env_ignore_empty=True):
     DB_NAME: str = "budget_bot"
 
     DB_ECHO: bool = False
-    DB_TEST: bool = False
+    DB_TEST: bool | str = False
 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
@@ -24,13 +29,17 @@ class Settings(BaseSettings, env_ignore_empty=True):
 
     @property
     def db_url(self) -> str:
-        if self.DB_TEST:
-            return 'sqlite+aiosqlite:///testdb.db'
+        if self.DB_TEST or os.environ.get('DB_TEST'):
+            return 'sqlite+aiosqlite:///:memory:'
 
         return (
             f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
+
+    @property
+    def project_dir(self) -> Path:
+        return PWD
 
 
 settings = Settings()

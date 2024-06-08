@@ -73,4 +73,5 @@ def downgrade() -> None:
     op.drop_table('categories')
     op.drop_table('users')
     op.drop_table('currencies')
+    op.execute("DROP TYPE role")
     # ### end Alembic commands ###

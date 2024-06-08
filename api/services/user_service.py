@@ -27,6 +27,10 @@ class UserService:
             users: list = await self.uow.user.get_all(**kwargs)
             return [User.model_validate(user) for user in users]
 
+    async def count_users(self) -> int:
+        async with self.uow:
+            return await self.uow.user.count()
+
 
 async def get_user_service(
         uow: IUnitOfWork = Depends(UnitOfWork)

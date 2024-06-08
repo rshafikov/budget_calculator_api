@@ -11,6 +11,12 @@ class Role(enum.Enum):
     ADMIN: str = "admin"
     USER: str = "user"
 
+    def __hash__(self):
+        return hash(str(self.value))
+
+    def __str__(self):
+        return str(self.value)
+
 
 class UserBase(BaseModel):
     telegram_id: str

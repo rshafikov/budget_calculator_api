@@ -1,4 +1,5 @@
 pytest
 httpx
 pylint
-pip install aiosqlite
+aiosqlite
+mock
