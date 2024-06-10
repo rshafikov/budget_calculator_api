@@ -47,17 +47,12 @@ async def get_users(
 async def get_user(
     user_tg_id: str, user_service: UserService = Depends(get_user_service)
 ):
-    db_user = await user_service.get_user(telegram_id=user_tg_id)
-
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return db_user
+    return await user_service.get_user_or_404(telegram_id=user_tg_id)
 
 
 @users_router.get("/me", response_model=UserSecure)
 async def user_profile(
     user_service: UserService = Depends(get_user_service),
-    user_token_payload: dict = Depends(rbac({Role.USER})),
+    user_payload: dict = Depends(rbac({Role.USER})),
 ):
-    return await user_service.get_user(telegram_id=user_token_payload["sub"])
+    return await user_service.get_user_or_404(telegram_id=user_payload["sub"])

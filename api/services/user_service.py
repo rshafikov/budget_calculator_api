@@ -1,14 +1,16 @@
-from fastapi import Depends
+import logging
+
+from fastapi import Depends, HTTPException
 
 from api.core.security import get_password_hash
 from api.schemas.user_schemas import User, UserCreate
+from api.services.base_service import BaseService
 from api.utils.uow import IUnitOfWork, UnitOfWork
 
+logger = logging.getLogger(__name__)
 
-class UserService:
-    def __init__(self, uow: IUnitOfWork):
-        self.uow = uow
 
+class UserService(BaseService):
     async def add_user(self, user: UserCreate) -> User:
         user.password = get_password_hash(user.password)
         async with self.uow:
@@ -27,9 +29,20 @@ class UserService:
             users: list = await self.uow.user.get_all(**kwargs)
             return [User.model_validate(user) for user in users]
 
-    async def count_users(self) -> int:
+    async def count_users(self, **kwargs) -> int:
         async with self.uow:
-            return await self.uow.user.count()
+            return await self.uow.user.count(**kwargs)
+
+    async def get_user_or_404(self, **kwargs) -> User:
+        user = await self.get_user(**kwargs)
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found or token expired"
+            )
+
+        return user
 
 
 async def get_user_service(

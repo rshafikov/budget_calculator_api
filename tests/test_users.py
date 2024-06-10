@@ -41,11 +41,11 @@ class TestUsers:
         assert response.status_code != status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
-    async def test_create_user(self, client, user_manager):
-        users_before = await user_manager.count_users()
+    async def test_create_user(self, client, db_manager):
+        users_before = await db_manager.user.count_users()
         new_user = {'telegram_id': '1234', 'name': 'user', 'password': 'pass'}
         response = await client.post('/users/', json=new_user)
-        users_after = await user_manager.count_users()
+        users_after = await db_manager.user.count_users()
 
         assert users_before + 1 == users_after
         assert response.status_code == status.HTTP_201_CREATED

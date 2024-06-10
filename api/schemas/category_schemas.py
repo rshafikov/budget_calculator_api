@@ -9,7 +9,7 @@ class CategoryBase(BaseModel):
 
 
 class CategoryCreate(CategoryBase):
-    pass
+    user_id: int
 
 
 class Category(CategoryBase):
@@ -18,4 +18,3 @@ class Category(CategoryBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    user_id: int

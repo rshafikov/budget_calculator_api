@@ -1,4 +1,5 @@
 import time
+from dataclasses import dataclass
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -9,8 +10,15 @@ from api.db.models import BaseModel
 from api.main import app
 from api.routers.auth import check_token
 from api.schemas.user_schemas import UserCreate
+from api.services.category_service import CategoryService, get_category_service
 from api.services.user_service import UserService, get_user_service
 from api.utils.uow import UnitOfWork
+
+
+@dataclass(frozen=True)
+class TestDBManager:
+    user: UserService
+    category: CategoryService
 
 
 @pytest.fixture()
@@ -23,7 +31,6 @@ async def test_user() -> UserCreate:
     )
 
 
-
 @pytest.fixture()
 async def create_db():
     async with engine.begin() as conn:
@@ -33,14 +40,17 @@ async def create_db():
 
 
 @pytest.fixture()
-async def user_manager(create_db):
-    manager = await get_user_service(UnitOfWork())
-    yield manager
+async def db_manager(create_db):
+    uow = UnitOfWork()
+    user_service = await get_user_service(uow)
+    category_service = await get_category_service(uow)
+
+    yield TestDBManager(user=user_service, category=category_service)
 
 
 @pytest.fixture()
-async def default_user(user_manager: UserService, test_user: UserCreate):
-    user = await user_manager.add_user(test_user.model_copy(deep=True))
+async def default_user(db_manager: TestDBManager, test_user: UserCreate):
+    user = await db_manager.user.add_user(test_user.model_copy(deep=True))
     yield user
 
 
