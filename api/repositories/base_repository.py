@@ -54,6 +54,8 @@ class Repository(AbstractRepository):
         return r.scalars().all()
 
     async def count(self, **kwargs):
-        query = select(func.count()).select_from(self.model).filter_by(**kwargs)
+        query = select(
+            func.count()
+        ).select_from(self.model).filter_by(**kwargs)
         r = await self.session.execute(query)
         return r.scalar_one()

@@ -5,11 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 class CurrencyBase(BaseModel):
     name: str
-    symbol: str | None
-
-
-class CurrencyCreate(CurrencyBase):
-    pass
+    symbol: str | None = None
 
 
 class Currency(CurrencyBase):

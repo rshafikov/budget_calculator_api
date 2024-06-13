@@ -11,13 +11,15 @@ from api.schemas.category_schemas import CategoryCreate
 )
 class TestCategories:
     @pytest.mark.asyncio
-    async def test_create_category(self, auth_client, default_user, db_manager):
+    async def test_create_category(
+            self, auth_client, default_user, db_manager
+    ):
         new_category = {'name': 'test_category', 'symbol': '✅'}
-        categories_before = await db_manager.category.count_categories(
+        categories_before = await db_manager.category.count_instances(
             user_id=default_user.id
         )
         response = await auth_client.post('/categories/', json=new_category)
-        categories_after = await db_manager.category.count_categories(
+        categories_after = await db_manager.category.count_instances(
             user_id=default_user.id
         )
 
@@ -27,7 +29,7 @@ class TestCategories:
 
     @pytest.mark.asyncio
     async def test_get_categories(self, auth_client, default_user, db_manager):
-        categories = await db_manager.category.get_categories(
+        categories = await db_manager.category.get_instances(
             user_id=default_user.id)
         response = await auth_client.get('/categories/')
 
@@ -55,13 +57,13 @@ class TestCategories:
             'symbol': '✅',
             'user_id': default_user.id
         }
-        category = await db_manager.category.create_category(
+        category = await db_manager.category.create_instance(
             CategoryCreate(**new_category))
-        categories_before = await db_manager.category.count_categories(
+        categories_before = await db_manager.category.count_instances(
             user_id=default_user.id
         )
         response = await auth_client.post('/categories/', json=new_category)
-        categories_after = await db_manager.category.count_categories(
+        categories_after = await db_manager.category.count_instances(
             user_id=default_user.id
         )
 

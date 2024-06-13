@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
-from starlette import status
 
 from api.routers.auth import rbac
 from api.schemas.category_schemas import CategoryBase, CategoryCreate
@@ -25,11 +24,12 @@ async def create_category_for_user(
         symbol=category.symbol
     )
     try:
-        return await category_service.create_category(new_category)
+        return await category_service.create_instance(instance=new_category)
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f'This category {category.name} already exists.')
+            detail=f'This category {category.name} already exists.'
+        )
 
 
 @category_router.get("/")
@@ -39,4 +39,4 @@ async def get_user_categories(
         user_service: UserService = Depends(get_user_service)
 ) -> list[CategoryBase]:
     user = await user_service.get_user_or_404(telegram_id=user_payload["sub"])
-    return await category_service.get_categories(user_id=user.id)
+    return await category_service.get_instances(user_id=user.id)

@@ -11,27 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 class UserService(BaseService):
+    manager_name = 'user'
+    default_result_schema = User
+
     async def add_user(self, user: UserCreate) -> User:
         user.password = get_password_hash(user.password)
-        async with self.uow:
-            user_from_db = await self.uow.user.add_one(user.model_dump())
-            user_to_return = User.model_validate(user_from_db)
-            await self.uow.commit()
-            return user_to_return
+        return await self.create_instance(instance=user)
 
     async def get_user(self, **kwargs) -> User | None:
-        async with self.uow:
-            user_from_db = await self.uow.user.get_one(**kwargs)
-            return User.model_validate(user_from_db) if user_from_db else None
-
-    async def get_users(self, **kwargs) -> list[User]:
-        async with self.uow:
-            users: list = await self.uow.user.get_all(**kwargs)
-            return [User.model_validate(user) for user in users]
-
-    async def count_users(self, **kwargs) -> int:
-        async with self.uow:
-            return await self.uow.user.count(**kwargs)
+        return await self.get_instance(**kwargs)
 
     async def get_user_or_404(self, **kwargs) -> User:
         user = await self.get_user(**kwargs)

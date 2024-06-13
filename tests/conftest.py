@@ -9,8 +9,10 @@ from api.db.database import engine
 from api.db.models import BaseModel
 from api.main import app
 from api.routers.auth import check_token
+from api.schemas.currency_schemas import CurrencyBase
 from api.schemas.user_schemas import UserCreate
 from api.services.category_service import CategoryService, get_category_service
+from api.services.currency_service import CurrencyService, get_currency_service
 from api.services.user_service import UserService, get_user_service
 from api.utils.uow import UnitOfWork
 
@@ -19,6 +21,7 @@ from api.utils.uow import UnitOfWork
 class TestDBManager:
     user: UserService
     category: CategoryService
+    currency: CurrencyService
 
 
 @pytest.fixture()
@@ -44,8 +47,13 @@ async def db_manager(create_db):
     uow = UnitOfWork()
     user_service = await get_user_service(uow)
     category_service = await get_category_service(uow)
+    currency_service = await get_currency_service(uow)
 
-    yield TestDBManager(user=user_service, category=category_service)
+    yield TestDBManager(
+        user=user_service,
+        category=category_service,
+        currency=currency_service
+    )
 
 
 @pytest.fixture()
@@ -83,3 +91,10 @@ async def mock_token():
     app.dependency_overrides[check_token] = lambda: admin_token
     yield admin_token
     app.dependency_overrides = {}
+
+
+@pytest.fixture()
+async def default_currency(db_manager: TestDBManager):
+    euro = await db_manager.currency.create_instance(
+        CurrencyBase(name='EUR', symbol='€'))
+    yield euro

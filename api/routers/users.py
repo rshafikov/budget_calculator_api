@@ -6,18 +6,15 @@ from api.services.user_service import UserService, get_user_service
 
 users_router = APIRouter(
     prefix="/users",
-    tags=["users"],
+    tags=["users"]
 )
 
 
-@users_router.post(
-    "/",
-    status_code=status.HTTP_201_CREATED,
-    response_model=UserBase
-)
+@users_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(
-    new_user: UserCreate, user_service: UserService = Depends(get_user_service)
-):
+        new_user: UserCreate,
+        user_service: UserService = Depends(get_user_service)
+) -> UserBase:
     db_user = await user_service.get_user(telegram_id=new_user.telegram_id)
 
     if db_user:
@@ -26,28 +23,21 @@ async def create_user(
     return await user_service.add_user(new_user)
 
 
-@users_router.get(
-    "/",
-    response_model=list[UserBase],
-    dependencies=[Depends(rbac({Role.ADMIN}))]
-)
+@users_router.get("/", dependencies=[Depends(rbac({Role.ADMIN}))])
 async def get_users(
     offset: int = 0,
     limit: int = 100,
     user_service: UserService = Depends(get_user_service),
-):
-    return await user_service.get_users(offset=offset, limit=limit)
+) -> list[UserBase]:
+    return await user_service.get_instances(offset=offset, limit=limit)
 
 
-@users_router.get(
-    "/{user_tg_id}/",
-    response_model=UserBase,
-    dependencies=[Depends(rbac({Role.ADMIN}))],
-)
+@users_router.get("/{tg_id}/", dependencies=[Depends(rbac({Role.ADMIN}))])
 async def get_user(
-    user_tg_id: str, user_service: UserService = Depends(get_user_service)
-):
-    return await user_service.get_user_or_404(telegram_id=user_tg_id)
+        tg_id: str,
+        user_service: UserService = Depends(get_user_service)
+) -> UserBase:
+    return await user_service.get_user_or_404(telegram_id=tg_id)
 
 
 @users_router.get("/me", response_model=UserSecure)

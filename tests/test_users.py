@@ -42,10 +42,10 @@ class TestUsers:
 
     @pytest.mark.asyncio
     async def test_create_user(self, client, db_manager):
-        users_before = await db_manager.user.count_users()
+        users_before = await db_manager.user.count_instances()
         new_user = {'telegram_id': '1234', 'name': 'user', 'password': 'pass'}
         response = await client.post('/users/', json=new_user)
-        users_after = await db_manager.user.count_users()
+        users_after = await db_manager.user.count_instances()
 
         assert users_before + 1 == users_after
         assert response.status_code == status.HTTP_201_CREATED
