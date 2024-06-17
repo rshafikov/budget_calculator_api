@@ -4,13 +4,13 @@ from api.routers.auth import rbac
 from api.schemas.user_schemas import Role, UserBase, UserCreate, UserSecure
 from api.services.user_service import UserService, get_user_service
 
-users_router = APIRouter(
+user_router = APIRouter(
     prefix="/users",
     tags=["users"]
 )
 
 
-@users_router.post("/", status_code=status.HTTP_201_CREATED)
+@user_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(
         new_user: UserCreate,
         user_service: UserService = Depends(get_user_service)
@@ -23,7 +23,7 @@ async def create_user(
     return await user_service.add_user(new_user)
 
 
-@users_router.get("/", dependencies=[Depends(rbac({Role.ADMIN}))])
+@user_router.get("/", dependencies=[Depends(rbac({Role.ADMIN}))])
 async def get_users(
     offset: int = 0,
     limit: int = 100,
@@ -32,7 +32,7 @@ async def get_users(
     return await user_service.get_instances(offset=offset, limit=limit)
 
 
-@users_router.get("/{tg_id}/", dependencies=[Depends(rbac({Role.ADMIN}))])
+@user_router.get("/{tg_id}/", dependencies=[Depends(rbac({Role.ADMIN}))])
 async def get_user(
         tg_id: str,
         user_service: UserService = Depends(get_user_service)
@@ -40,7 +40,7 @@ async def get_user(
     return await user_service.get_user_or_404(telegram_id=tg_id)
 
 
-@users_router.get("/me", response_model=UserSecure)
+@user_router.get("/me", response_model=UserSecure)
 async def user_profile(
     user_service: UserService = Depends(get_user_service),
     user_payload: dict = Depends(rbac({Role.USER})),

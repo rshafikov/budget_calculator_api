@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 
 from api.core.security import get_password_hash
 from api.schemas.user_schemas import User, UserCreate
@@ -22,15 +22,9 @@ class UserService(BaseService):
         return await self.get_instance(**kwargs)
 
     async def get_user_or_404(self, **kwargs) -> User:
-        user = await self.get_user(**kwargs)
-
-        if not user:
-            raise HTTPException(
-                status_code=404,
-                detail="User not found or token expired"
-            )
-
-        return user
+        return await self.get_instance_or_404(
+            error_msg='User not found or token expired', **kwargs
+        )
 
 
 async def get_user_service(

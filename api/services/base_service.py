@@ -1,5 +1,7 @@
 from typing import Any
 
+from fastapi import HTTPException
+
 from api.utils.uow import IUnitOfWork
 
 
@@ -36,3 +38,19 @@ class BaseService:
         async with self.uow:
             manager = getattr(self.uow, self.manager_name)
             return await manager.count(**kwargs)
+
+    async def get_instance_or_404(self, **kwargs) -> Any:
+        error_msg = kwargs.pop(
+            'error_msg', (
+                f'Instance {self.default_result_schema.__name__} '
+                f'not found')
+            )
+        instance = await self.get_instance(**kwargs)
+
+        if not instance:
+            raise HTTPException(
+                status_code=404,
+                detail=error_msg
+            )
+
+        return instance
