@@ -9,6 +9,8 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      DB_TEST: True
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
