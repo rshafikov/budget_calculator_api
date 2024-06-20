@@ -31,21 +31,17 @@ async def create_record(
         user_service: UserService = Depends(get_user_service),
         category_service: CategoryService = Depends(get_category_service),
         record_service: RecordService = Depends(get_record_service)
-) -> RecordResponse:
+) -> RecordExternal:
     user = await user_service.get_user_or_404(telegram_id=user_payload['sub'])
     category = await category_service.get_instance_or_404(
         name=record.category_name,
         error_msg=f'Category {record.category_name!r} not found'
     )
-    new_record = await record_service.create_instance(
+    return await record_service.create_instance(
         RecordCreate(
             user_id=user.id,
             category_id=category.id,
             currency_id=1,
             amount=record.amount
         )
-    )
-    return RecordResponse(
-        category_name=record.category_name,
-        **new_record.model_dump()
     )
