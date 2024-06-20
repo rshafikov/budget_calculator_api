@@ -1,5 +1,7 @@
+-r requirements.txt
 pytest
 httpx
 pylint
 aiosqlite
 mock
+pytest-asyncio
