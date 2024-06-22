@@ -5,6 +5,7 @@ from sqlalchemy import Enum, ForeignKey, UniqueConstraint, func
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from api.schemas.currency_schemas import Currency
 from api.schemas.user_schemas import Role
 
 
@@ -36,6 +37,9 @@ class UserModel(BaseModel):
     categories: Mapped[List["CategoryModel"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
+    currency: Mapped[Currency] = mapped_column(
+        Enum(Currency), nullable=False, default=Currency.RUB
+    )
 
 
 class RecordModel(BaseModel):
@@ -52,7 +56,7 @@ class RecordModel(BaseModel):
         back_populates="records", lazy="selectin"
     )
 
-    currency_id: Mapped[int] = mapped_column(ForeignKey("currencies.id"))
+    currency: Mapped[Currency] = mapped_column(Enum(Currency), nullable=False)
 
 
 class CategoryModel(BaseModel):

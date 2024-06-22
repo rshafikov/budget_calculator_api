@@ -28,6 +28,10 @@ class UserCreate(UserBase):
     password: str
 
 
+class AdminCreate(UserCreate):
+    role: Role
+
+
 class User(UserBase):
     model_config = ConfigDict(from_attributes=True)
 

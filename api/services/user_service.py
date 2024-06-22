@@ -3,7 +3,7 @@ import logging
 from fastapi import Depends
 
 from api.core.security import get_password_hash
-from api.schemas.user_schemas import User, UserCreate
+from api.schemas.user_schemas import AdminCreate, User, UserCreate
 from api.services.base_service import BaseService
 from api.utils.uow import IUnitOfWork, UnitOfWork
 
@@ -14,7 +14,7 @@ class UserService(BaseService):
     manager_name = 'user'
     default_result_schema = User
 
-    async def add_user(self, user: UserCreate) -> User:
+    async def add_user(self, user: UserCreate | AdminCreate) -> User:
         user.password = get_password_hash(user.password)
         return await self.create_instance(instance=user)
 

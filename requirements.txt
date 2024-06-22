@@ -10,3 +10,4 @@ python-jose[cryptography]
 passlib[bcrypt]
 pyjwt
 python-multipart
+alembic-postgresql-enum

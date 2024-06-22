@@ -8,7 +8,7 @@ from api.routers.currency import currency_router
 from api.routers.records import record_router
 from api.routers.users import user_router
 
-app = FastAPI()
+app = FastAPI(root_path="/api/v1")
 
 app.include_router(user_router)
 app.include_router(auth_router)

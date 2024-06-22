@@ -1,6 +1,13 @@
+import enum
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
+
+
+class Currency(enum.Enum):
+    RUB = 'RUB'
+    USD = 'USD'
+    EUR = 'EUR'
 
 
 class CurrencyBase(BaseModel):
@@ -8,7 +15,7 @@ class CurrencyBase(BaseModel):
     symbol: str | None = None
 
 
-class Currency(CurrencyBase):
+class CurrencyDB(CurrencyBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int

@@ -1,3 +1,5 @@
+import alembic_postgresql_enum
+
 import os
 import sys
 
