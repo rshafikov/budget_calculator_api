@@ -40,9 +40,9 @@ async def get_user(
     return await user_service.get_user_or_404(telegram_id=tg_id)
 
 
-@user_router.get("/me", response_model=UserSecure)
+@user_router.get("/me")
 async def user_profile(
     user_service: UserService = Depends(get_user_service),
     user_payload: dict = Depends(rbac({Role.USER})),
-):
+) -> UserSecure:
     return await user_service.get_user_or_404(telegram_id=user_payload["sub"])

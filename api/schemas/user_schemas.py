@@ -3,8 +3,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from api.schemas.category_schemas import Category
-from api.schemas.record_schemas import Record
+from api.schemas.category_schemas import Category, CategoryBase
+from api.schemas.currency_schemas import Currency
+from api.schemas.record_schemas import Record, RecordExternal
 
 
 class Role(enum.Enum):
@@ -43,10 +44,12 @@ class User(UserBase):
 
     records: list[Record | None]
     categories: list[Category | None]
+    currency: Currency
 
 
 class UserSecure(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
-    records: list[Record | None]
-    categories: list[Category | None]
+    currency: Currency
+    records: list[RecordExternal | None]
+    categories: list[CategoryBase | None]

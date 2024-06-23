@@ -21,7 +21,7 @@ class UserService(BaseService):
     async def get_user(self, **kwargs) -> User | None:
         return await self.get_instance(**kwargs)
 
-    async def get_user_or_404(self, **kwargs) -> User:
+    async def get_user_or_404(self, **kwargs):
         return await self.get_instance_or_404(
             error_msg='User not found or token expired', **kwargs
         )

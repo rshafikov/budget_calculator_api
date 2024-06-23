@@ -1,8 +1,10 @@
-from typing import List
+from typing import Annotated, List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from starlette import status
 
 from api.routers.auth import rbac
+from api.schemas.currency_schemas import Currency
 from api.schemas.record_schemas import (RecordCreate, RecordExternal,
                                         RecordRequest)
 from api.schemas.user_schemas import Role
@@ -23,9 +25,10 @@ async def get_records(
     return await record_service.get_instances(user_id=user.id)
 
 
-@record_router.post("/")
+@record_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_record(
         record: RecordRequest,
+        currency: Annotated[Currency | None, Query(max_length=3)] = None,
         user_payload: dict = Depends(rbac({Role.USER})),
         user_service: UserService = Depends(get_user_service),
         category_service: CategoryService = Depends(get_category_service),
@@ -41,7 +44,7 @@ async def create_record(
         RecordCreate(
             user_id=user.id,
             category_id=category.id,
-            currency=record.currency if record.currency else user.currency,
+            currency=currency if currency is not None else user.currency,
             amount=record.amount
         )
     )

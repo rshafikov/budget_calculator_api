@@ -9,10 +9,13 @@ from api.db.database import engine
 from api.db.models import BaseModel
 from api.main import app
 from api.routers.auth import check_token
+from api.schemas.category_schemas import Category, CategoryCreate
 from api.schemas.currency_schemas import CurrencyBase
-from api.schemas.user_schemas import UserCreate
+from api.schemas.record_schemas import RecordCreate
+from api.schemas.user_schemas import User, UserCreate
 from api.services.category_service import CategoryService, get_category_service
 from api.services.currency_service import CurrencyService, get_currency_service
+from api.services.record_service import RecordService, get_record_service
 from api.services.user_service import UserService, get_user_service
 from api.utils.uow import UnitOfWork
 
@@ -22,6 +25,7 @@ class TestDBManager:
     user: UserService
     category: CategoryService
     currency: CurrencyService
+    record: RecordService
 
 
 @pytest.fixture()
@@ -48,22 +52,24 @@ async def db_manager(create_db):
     user_service = await get_user_service(uow)
     category_service = await get_category_service(uow)
     currency_service = await get_currency_service(uow)
+    record_service = await get_record_service(uow)
 
     yield TestDBManager(
         user=user_service,
         category=category_service,
-        currency=currency_service
+        currency=currency_service,
+        record=record_service
     )
 
 
 @pytest.fixture()
-async def default_user(db_manager: TestDBManager, test_user: UserCreate):
+async def default_user(db_manager: TestDBManager, test_user: UserCreate) -> User:
     user = await db_manager.user.add_user(test_user.model_copy(deep=True))
     yield user
 
 
 @pytest.fixture()
-async def auth_client(default_user: UserCreate):
+async def auth_client(default_user: User):
     token = create_token(default_user.telegram_id)
     async with AsyncClient(
             transport=ASGITransport(app=app),
@@ -98,3 +104,32 @@ async def default_currency(db_manager: TestDBManager):
     euro = await db_manager.currency.create_instance(
         CurrencyBase(name='EUR', symbol='€'))
     yield euro
+
+
+@pytest.fixture()
+async def default_category(db_manager: TestDBManager, default_user: User) -> Category:
+    new_category = await db_manager.category.create_instance(
+        CategoryCreate(
+            name='test_category',
+            symbol='test_category_symbol',
+            user_id=default_user.id
+        )
+    )
+    yield new_category
+
+
+@pytest.fixture()
+async def default_record(
+        db_manager: TestDBManager,
+        default_user: User,
+        default_category: Category,
+) -> Category:
+    new_record = await db_manager.record.create_instance(
+        RecordCreate(
+            user_id=default_user.id,
+            category_id=default_category.id,
+            currency=default_user.currency,
+            amount='777'
+        )
+    )
+    yield new_record

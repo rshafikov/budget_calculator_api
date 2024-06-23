@@ -12,7 +12,6 @@ class RecordBase(BaseModel):
 
 class RecordRequest(RecordBase):
     category_name: str
-    currency: Currency | None = None
 
 
 class RecordCreate(RecordBase):
