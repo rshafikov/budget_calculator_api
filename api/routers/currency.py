@@ -37,4 +37,4 @@ async def get_currency(
         currency_name: str,
         currency_service: CurrencyService = Depends(get_currency_service)
 ) -> CurrencyBase:
-    return await currency_service.get_instance(name=currency_name)
+    return await currency_service.get_instance_or_404(name=currency_name)

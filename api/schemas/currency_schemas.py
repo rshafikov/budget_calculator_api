@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class Currency(enum.Enum):
+class Currency(str, enum.Enum):
     RUB = 'RUB'
     USD = 'USD'
     EUR = 'EUR'

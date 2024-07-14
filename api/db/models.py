@@ -68,9 +68,9 @@ class CategoryModel(BaseModel):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="categories")
 
-    records: Mapped[List["RecordModel"]] = relationship(
-        back_populates="category",
-        cascade="all, delete-orphan",)
+    records: Mapped[List["RecordModel"]] = relationship(back_populates="category")
+
+    hidden: Mapped[bool] = mapped_column(default=False)
 
     __table_args__ = (
         UniqueConstraint("name", "user_id", name="_name_user_uc"),

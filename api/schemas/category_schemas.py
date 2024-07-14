@@ -18,3 +18,4 @@ class Category(CategoryBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    hidden: bool

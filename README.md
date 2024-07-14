@@ -1,13 +1,1 @@
-# ASYNC_budget_calculator
-
-## Technologies:
-
-- SQLAlchemy
-
-- FastAPI
-
-- aiogramm
-
-- telegramm web-app
-
-- PostgreSQL
+<h1 style="text-align:center">keep-your-budget-bot</h1>

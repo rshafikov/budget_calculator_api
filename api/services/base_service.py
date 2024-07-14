@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import HTTPException
 
+from api.core.security import sanitize_args
 from api.utils.uow import IUnitOfWork
 
 
@@ -20,10 +21,13 @@ class BaseService:
             await self.uow.commit()
             return created
 
-    async def get_instance(self, **kwargs):
+    async def get_instance(self, raw_model: bool = False, **kwargs):
         async with self.uow:
             manager = getattr(self.uow, self.manager_name)
             instance = await manager.get_one(**kwargs)
+            if raw_model:
+                return instance
+
             return self.default_result_schema.model_validate(
                 instance) if instance else None
 
@@ -39,18 +43,33 @@ class BaseService:
             manager = getattr(self.uow, self.manager_name)
             return await manager.count(**kwargs)
 
-    async def get_instance_or_404(self, **kwargs) -> Any:
-        error_msg = kwargs.pop(
-            'error_msg', (
-                f'Instance {self.default_result_schema.__name__} '
-                f'not found')
-            )
-        instance = await self.get_instance(**kwargs)
+    async def update_instance(self, instance_id, data: dict):
+        async with self.uow:
+            manager = getattr(self.uow, self.manager_name)
+            update = await manager.update_one(instance_id, data)
+            updated = self.default_result_schema.model_validate(update)
+            await self.uow.commit()
+            return updated
+
+    async def delete_instance(self, instance=None, **kwargs) -> None:
+        async with self.uow:
+            manager = getattr(self.uow, self.manager_name)
+            await manager.delete_one(instance=instance, **kwargs)
+            await self.uow.commit()
+
+    async def get_instance_or_404(self, raw_model: bool = False, **kwargs) -> Any:
+        error_msg = kwargs.pop('error_msg', None)
+        instance = await self.get_instance(raw_model=raw_model, **kwargs)
 
         if not instance:
-            raise HTTPException(
-                status_code=404,
-                detail=error_msg
-            )
+            if error_msg is None:
+                req_args = kwargs.copy()
+                error_msg = (
+                    f'Instance with parameters: {sanitize_args(req_args)!r} '
+                    f'not found in '
+                    f'{self.default_result_schema.__name__.replace("DB", "")}'
+                )
+
+            raise HTTPException(status_code=404, detail=error_msg)
 
         return instance

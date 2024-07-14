@@ -70,4 +70,60 @@ class TestCategories:
         assert response.status_code == status.HTTP_409_CONFLICT
         assert categories_after == categories_before
         assert response.json()['detail'] == (
-            f'This category {category.name} already exists.')
+            f'Category with name {category.name!r} already exists.')
+
+    @pytest.mark.asyncio
+    async def test_delete_empty_category(self, auth_client, default_category, db_manager):
+        categories_before = await db_manager.category.count_instances()
+        response = await auth_client.delete(f'/categories/{default_category.name}')
+        categories_after = await db_manager.category.count_instances()
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert categories_before == categories_after + 1
+
+    @pytest.mark.asyncio
+    async def test_delete_category_with_record(
+            self, auth_client, default_category, default_record, db_manager
+    ):
+        categories_before = await db_manager.category.count_instances(hidden=False)
+        response = await auth_client.delete(f'/categories/{default_category.name}')
+        categories_after = await db_manager.category.count_instances(hidden=False)
+        hidden_category = await db_manager.category.get_instance(
+            id=default_category.id, hidden=True
+        )
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert categories_before == categories_after + 1
+        assert hidden_category is not None
+        assert hidden_category.hidden
+
+    @pytest.mark.asyncio
+    async def test_update_category(
+            self, auth_client, default_category, default_record, db_manager
+    ):
+        category_changes = {'name': 'category_updated_name', 'symbol': '😃'}
+        response = await auth_client.put(
+            f'/categories/{default_category.name}', json=category_changes)
+        category = await db_manager.category.get_instance(id=default_category.id)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert category.name == category_changes['name']
+        assert category.symbol == category_changes['symbol']
+
+    @pytest.mark.asyncio
+    async def test_create_category_if_it_hidden(
+            self, auth_client, default_category, default_record, db_manager
+    ):
+        await auth_client.delete(f'/categories/{default_category.name}')
+        category_before_recreate = await db_manager.category.get_instance(id=default_category.id)
+        response = await auth_client.post(
+            '/categories/', json={
+                'name': default_category.name,
+                'symbol': 'new_symbol - 😀'
+            }
+        )
+        category_after = await db_manager.category.get_instance(id=default_category.id)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert category_before_recreate.hidden
+        assert not category_after.hidden

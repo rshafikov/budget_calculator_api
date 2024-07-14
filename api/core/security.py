@@ -28,3 +28,11 @@ def create_token(user_tg_id: str, user_role: Role = Role.USER):
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM,
     )
+
+
+def sanitize_args(params: dict):
+    params.pop('password', None)
+    params.pop('user_id', None)
+    params.pop('role', None)
+    params.pop('hidden', None)
+    return params
