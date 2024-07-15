@@ -196,7 +196,7 @@ class MyBot:
             )
 
         elif user.last_message.lower() in user_categories:
-            user.last_category = user.last_message.lower()
+            user.last_category = user.last_message
             context.bot.send_message(
                 chat_id=user.id,
                 text='Укажите сумму:'
@@ -242,7 +242,7 @@ class MyBot:
                 user.last_summ = None
 
             elif not user.last_summ and user.last_category:
-                if user.last_message not in user_categories:
+                if user.last_message.lower() not in user_categories:
                     self.user_create_category(
                         user, user.last_category, 'POST', context)
                     user.last_category = None

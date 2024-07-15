@@ -34,7 +34,7 @@ class User:
         # TODO: add exception handling for every HTTP request
 
         data = json.dumps({
-            'username': self.username,
+            'username': f'{self.id}_{self.username}',
             'password': f'{self.id}{PASSWORD}',
         })
         req = r.post(
