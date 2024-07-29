@@ -57,7 +57,9 @@ class BaseService:
             await manager.delete_one(instance=instance, **kwargs)
             await self.uow.commit()
 
-    async def get_instance_or_404(self, raw_model: bool = False, **kwargs) -> Any:
+    async def get_instance_or_404(
+            self, raw_model: bool = False, **kwargs
+    ) -> Any:
         error_msg = kwargs.pop('error_msg', None)
         instance = await self.get_instance(raw_model=raw_model, **kwargs)
 

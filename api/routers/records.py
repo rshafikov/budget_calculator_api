@@ -1,7 +1,7 @@
+from datetime import date
 from typing import Annotated, List
 
-from fastapi import APIRouter, Query
-from starlette import status
+from fastapi import APIRouter, Query, status
 
 from api.schemas.currency_schemas import Currency
 from api.schemas.record_schemas import (RecordCreate, RecordExternal,
@@ -16,8 +16,10 @@ record_router = APIRouter(prefix="/records", tags=["records"])
 async def get_records(
     user: CurrentUserDeps,
     record_service: RecordServiceDeps,
+    _from: Annotated[date | None, Query(alias='from')] = None,
+    _to: Annotated[date | None, Query(alias='to')] = None
 ) -> List[RecordExternal]:
-    return await record_service.get_instances(user_id=user.id)
+    return await record_service.filter(_from, _to, user_id=user.id)
 
 
 @record_router.post("/", status_code=status.HTTP_201_CREATED)

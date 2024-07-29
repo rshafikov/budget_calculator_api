@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from api.exceptions.exc_handlers import add_exc_handlers
 from api.routers.auth import auth_router
@@ -20,8 +21,8 @@ add_exc_handlers(app)
 
 
 @app.get('/')
-async def index():
-    return {'message': 'Welcome to the project API!'}
+async def index() -> RedirectResponse:
+    return RedirectResponse('/docs')
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ class AbstractRepository(ABC):
 
 
 class Repository(AbstractRepository):
-    model: BaseModel = None
+    model: BaseModel | None = None
 
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -64,17 +64,21 @@ class Repository(AbstractRepository):
 
     async def count(self, **kwargs):
         q = select(func.count()).select_from(self.model).filter_by(**kwargs)
-        r = await self.session.execute(q)
-        return r.scalar_one()
+        return await self.session.scalar(q)
 
     async def update_one(self, instance_id, data: dict):
         try:
-            q = update(self.model).where(
-                self.model.id == instance_id).values(**data).returning(self.model)
+            q = update(
+                self.model
+            ).where(self.model.id == instance_id
+                    ).values(**data).returning(self.model)
             result = await self.session.execute(q)
             return result.scalar_one()
         except IntegrityError as err:
-            logger.error('Unable to update instance %r with %r: %s', instance_id, data, err)
+            logger.error(
+                'Unable to update instance %r with %r: %s',
+                instance_id, data, err
+            )
             raise err
 
     async def delete_one(self, instance=None, **kwargs):
@@ -86,5 +90,8 @@ class Repository(AbstractRepository):
             await self.session.execute(q)
 
         except IntegrityError as err:
-            logger.error('Unable to delete instance with criteria %r: %s', kwargs, err)
+            logger.error(
+                'Unable to delete instance with criteria %r: %s',
+                kwargs, err
+            )
             raise err

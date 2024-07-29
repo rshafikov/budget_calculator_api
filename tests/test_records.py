@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import pytest
 from fastapi import status
 
@@ -48,3 +50,19 @@ class TestRecords:
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.json(), list)
         assert len(response.json()) >= 1
+
+    async def test_filter_records(self, auth_client, default_record):
+        before_yesterday = date.today() - timedelta(days=2)
+        yesterday = date.today() - timedelta(days=1)
+        tomorrow = date.today() + timedelta(days=1)
+        empty_response = await auth_client.get(
+            f'/records/?from={before_yesterday}&to={yesterday}'
+        )
+        filled_response = await auth_client.get(
+            f'/records/?from={yesterday}&to={tomorrow}'
+        )
+
+        assert empty_response.status_code == status.HTTP_200_OK
+        assert empty_response.json() == []
+        assert filled_response.status_code == status.HTTP_200_OK
+        assert len(filled_response.json()) >= 1

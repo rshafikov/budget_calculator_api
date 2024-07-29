@@ -59,10 +59,15 @@ async def update_category(
     category = await manager.get_instance_or_404(
         name=category_name, user_id=user.id, hidden=False
     )
-    return await manager.update_instance(category.id, updated_category.model_dump())
+    return await manager.update_instance(
+        category.id, updated_category.model_dump()
+    )
 
 
-@category_router.delete("/{category_name}", status_code=status.HTTP_204_NO_CONTENT)
+@category_router.delete(
+    "/{category_name}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_category(
         category_name: str,
         user: CurrentUserDeps,
@@ -72,7 +77,9 @@ async def delete_category(
     category = await category_manager.get_instance_or_404(
         name=category_name, user_id=user.id, hidden=False
     )
-    category_records = await record_manager.get_instances(category_id=category.id)
+    category_records = await record_manager.get_instances(
+        category_id=category.id
+    )
     if category_records:
         await category_manager.update_instance(
             instance_id=category.id, data={'hidden': True}

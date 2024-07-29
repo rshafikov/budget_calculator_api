@@ -18,7 +18,9 @@ token_security = OAuth2PasswordBearer(tokenUrl="/auth/token")
 logger = logging.getLogger(__name__)
 
 
-def check_token(enc_token: Annotated[str, Depends(token_security)]) -> dict:
+async def check_token(
+        enc_token: Annotated[str, Depends(token_security)]
+) -> dict:
     try:
         return jwt.decode(
             enc_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -52,7 +54,7 @@ async def authenticate_user(
 
 
 def rbac(roles: set[Role]):
-    def validate_role(token_payload: dict = Depends(check_token)) -> dict:
+    async def validate(token_payload: dict = Depends(check_token)) -> dict:
         roles.add(Role.ADMIN)
 
         if Role(token_payload["role"]) not in roles:
@@ -63,7 +65,7 @@ def rbac(roles: set[Role]):
 
         return token_payload
 
-    return validate_role
+    return validate
 
 
 async def get_auth_user(
