@@ -2,6 +2,7 @@ sqlalchemy[asyncio]
 alembic
 asyncpg
 fastapi
+fastapi-cli
 pydantic
 python-dotenv
 uvicorn

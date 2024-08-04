@@ -23,27 +23,28 @@ def upgrade() -> None:
     sa.Enum('RUB', 'USD', 'EUR', name='currency').create(op.get_bind())
     sa.Enum('ADMIN', 'USER', name='role').create(op.get_bind())
     op.create_table('currencies',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('symbol', sa.String(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('lastname', sa.String(), nullable=True),
     sa.Column('telegram_id', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
     sa.Column('role', postgresql.ENUM('ADMIN', 'USER', name='role', create_type=False), nullable=False),
     sa.Column('currency', postgresql.ENUM('RUB', 'USD', 'EUR', name='currency', create_type=False), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('telegram_id')
     )
     op.create_table('categories',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('symbol', sa.String(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -55,11 +56,11 @@ def upgrade() -> None:
     sa.UniqueConstraint('name', 'user_id', name='_name_user_uc')
     )
     op.create_table('records',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('currency', postgresql.ENUM('RUB', 'USD', 'EUR', name='currency', create_type=False), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
